@@ -1,0 +1,16 @@
+# --
+# Copyright (c) 2008-2017 Net-ng.
+# All rights reserved.
+#
+# This software is licensed under the BSD License, as described in
+# the file LICENSE.txt, which you should have received as part of
+# this distribution.
+# --
+
+tests:
+    script:
+        - /opt/stackless/bin/pip install flake8
+        - /opt/stackless/bin/flake8 nagare
+        - /opt/stackless/bin/pip install -i http://packages.net-ng.com/repository/pypi/simple --trusted-host packages.net-ng.com -e .
+        - /opt/stackless/bin/pytest
+
