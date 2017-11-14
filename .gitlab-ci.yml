@@ -12,7 +12,7 @@ image: docker-registry.net-ng.com/nng/dind-ubuntu:6
 tests:
     script:
         - pip install flake8
-        - flake
+        - flake8
         - pip install -i http://packages.net-ng.com/repository/pypi/simple --trusted-host packages.net-ng.com -e '.[test]'
         - pytest
 
