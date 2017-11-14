@@ -8,6 +8,8 @@
 # approval from Net-ng is strictly forbidden.
 # --
 
+import sys
+
 import webob
 from webob import exc
 
@@ -111,4 +113,3 @@ class WSGIApp(object):
             response = self.on_exception(request, response)
 
         return response(environ, start_response)
-

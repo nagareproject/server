@@ -13,8 +13,8 @@
 import os
 import logging
 
+from gevent import monkey, wsgi
 from gevent import socket as gsocket
-from gevent import monkey, event, wsgi
 
 monkey.patch_all()  # Monkey patch the Python standard library
 
