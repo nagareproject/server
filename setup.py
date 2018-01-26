@@ -1,11 +1,12 @@
 # Encoding: utf-8
 
 # --
-# (C)opyright Net-ng 2008-2017
+# Copyright (c) 2008-2018 Net-ng.
+# All rights reserved.
 #
-# This is a Net-ng proprietary source code.
-# Any reproduction modification or use without prior written
-# approval from Net-ng is strictly forbidden.
+# This software is licensed under the BSD License, as described in
+# the file LICENSE.txt, which you should have received as part of
+# this distribution.
 # --
 
 import os
@@ -14,35 +15,44 @@ import sys
 from setuptools import setup, find_packages
 
 
-if sys.version_info < (2, 7, 0):
-    print 'The Python version must be 2.7'
+if not (2, 7) <= sys.version_info[:2] < (3, 0):
+    print 'Python version must be 2.7'
     sys.exit(-2)
 
 
-with open(os.path.join(os.path.dirname(__file__), 'VERSION')) as version:
-    VERSION = version.readline().rstrip()
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as version:
+    LONG_DESCRIPTION = version.read()
 
 
 setup(
     name='nagare-server',
-    version=VERSION,
     author='Net-ng',
     author_email='alain.poirier@net-ng.com',
     description='Nagare Application Server',
-    license='proprietary',
+    long_description=LONG_DESCRIPTION,
+    license='BSD',
     keywords='',
-    url='',
+    url='https://github.com/nagareproject/server',
     packages=find_packages(),
-    include_package_data=True,
     zip_safe=False,
-    install_requires=('configobj', 'WebOb', 'gevent', 'nagare-services'),
-    extras_require={
-        'test': ('pytest',),
-        'full': (
-            'pytest',
-        )
-    },
-    namespace_packages=('nagare', 'nagare.server'),
-    setup_requires=('pytest-runner',),
-    tests_require=('pytest')
+    setup_requires=['setuptools_scm', 'pytest-runner'],
+    use_scm_version=True,
+    install_requires=['nagare-commands', 'nagare-services'],
+    tests_require=['pytest'],
+    entry_points='''
+    [console_scripts]
+    nagare-admin = nagare.admin.command:run
+
+    [nagare.commands]
+    info = nagare.admin.info:Info
+    app = nagare.commands:Commands
+
+    [nagare.commands.app]
+    info = nagare.admin.app_info:Info
+    serve = nagare.admin.app_serve:Serve
+
+    [nagare.services]
+    application = nagare.server.applications:Application
+    publisher = nagare.server.publishers:Publishers
+    '''
 )

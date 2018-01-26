@@ -1,18 +1,14 @@
 # Encoding: utf-8
 
 # --
-# (C)opyright Net-ng 2008-2017
+# Copyright (c) 2008-2018 Net-ng.
+# All rights reserved.
 #
-# This is a Net-ng source code.
-# Any reproduction modification or use without prior written
-# approval from Net-ng is strictly forbidden.
+# This software is licensed under the BSD License, as described in
+# the file LICENSE.txt, which you should have received as part of
+# this distribution.
 # --
 
-try:
-    import pkg_resources
+from pkgutil import extend_path
 
-    pkg_resources.declare_namespace(__name__)
-except ImportError:
-    from pkgutil import extend_path
-
-    __path__ = extend_path(__path__, __name__)
+__path__ = extend_path(__path__, __name__)
