@@ -40,7 +40,7 @@ class App(plugin.Plugin):
     def __call__(self, **params):
         try:
             response = RequestHandlersChain(self.request_handlers).next(**params)
-        except:
+        except Exception:
             this_file = os.path.basename(__file__)
 
             exc_type, exc_value, exc_traceback = sys.exc_info()

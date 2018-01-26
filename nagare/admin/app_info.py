@@ -32,10 +32,10 @@ class Info(command.Command):
         )
 
     def run(self, on, off, names, services_service):
-        criterias = lambda services, name, _: (name in services) in (on, off)
+        criterias = lambda services, name, _: (name in services) in (on, off)  # noqa: E731
 
         if names:
-            criterias = lambda services, name, service, c=criterias: c(services, name, service) and (name in names)
+            criterias = lambda services, name, service, c=criterias: c(services, name, service) and (name in names)  # noqa: E731
 
         services_service.display(criterias=criterias)
         return 0
