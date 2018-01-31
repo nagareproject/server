@@ -23,6 +23,10 @@ class Application(SelectionService):
         self.name = name
         self.config = config
 
+    @property
+    def DESC(self):
+        return 'Proxy to the <%s> application' % self.name
+
     def load_plugins(*args, **config):
         pass
 
@@ -30,5 +34,12 @@ class Application(SelectionService):
         super(Application, self).load_plugins({self.name: self.config})
         return self.service
 
+    def handle_start(self, *args, **kw):
+        if self.service is not None:
+            self.service.handle_start(*args, **kw)
+
     def handle_request(self, *args, **kw):
         return self.service.handle_request(*args, **kw)
+
+    def handle_interactive(self, *args, **kw):
+        return self.service.handle_interactive(*args, **kw)

@@ -20,10 +20,14 @@ from nagare.server.services import Services
 class Command(commands.Command):
     """The base class of all the commands"""
     WITH_CONFIG_FILENAME = True
+    WITH_STARTED_SERVICES = False
 
-    def start(self, services_service, **params):
-        for service in services_service.start_handlers.values():
-            service.handle_start(None)
+    def start(self, application_service, services_service, **params):
+        if self.WITH_STARTED_SERVICES:
+            app = application_service.create()
+
+            for service in services_service.start_handlers.values():
+                service.handle_start(app)
 
         return services_service(self.run, **params)
 
@@ -65,6 +69,7 @@ def run():
         {'activated_by_default': 'boolean(default=True)'},
         config_filename, 'services'
     )
+
     services = Services(config_filename, '', 'nagare.services', config['activated_by_default'])
 
     return services(command.start, **arguments)

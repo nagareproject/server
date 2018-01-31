@@ -27,21 +27,24 @@ class Services(services.Services):
             **dict(os.environ, **initial_config)
         )
 
-    @property
-    def request_handlers(self):
+    def handlers(self, attribute):
         return OrderedDict(
             (name, service)
             for name, service in self.items()
-            if hasattr(service, 'handle_request')
+            if hasattr(service, attribute)
         )
 
     @property
+    def request_handlers(self):
+        return self.handlers('handle_request')
+
+    @property
     def start_handlers(self):
-        return OrderedDict(
-            (name, service)
-            for name, service in self.items()
-            if hasattr(service, 'handle_start')
-        )
+        return self.handlers('handle_start')
+
+    @property
+    def interactive_handlers(self):
+        return self.handlers('handle_interactive')
 
     def display(self, criterias=lambda services, name, service: True):
         super(Services, self).display(criterias=criterias)

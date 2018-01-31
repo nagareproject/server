@@ -37,6 +37,12 @@ class App(plugin.Plugin):
     def handle_request(self, chain, **kw):
         return None
 
+    def handle_start(self, app):
+        return
+
+    def handle_interactive(self):
+        return {'app': self}
+
     def __call__(self, **params):
         try:
             response = RequestHandlersChain(self.request_handlers).next(**params)
