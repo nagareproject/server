@@ -16,13 +16,9 @@ from nagare.admin import command
 class Serve(command.Command):
     DESC = 'Launch applications'
 
-    def run(self, publisher_service, services_service, sessions_service=None):
+    def run(self, publisher_service, services_service):
         # ToDo: files_to_watch
         publisher = publisher_service.service
-
-        if sessions_service is not None:
-            sessions_service.check_concurrence(publisher.has_multi_processes, publisher.has_multi_threads)
-
         return services_service(publisher.serve)
 
     start = run

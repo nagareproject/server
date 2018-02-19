@@ -18,7 +18,8 @@ class Info(command.Command):
     DESC = 'Display various informations'
     WITH_CONFIG_FILENAME = False
 
-    def run(self):
+    @staticmethod
+    def run():
         print sys.subversion[0], sys.version
         print
         print 'Nagare server version', pkg_resources.get_distribution('nagare-server').version
