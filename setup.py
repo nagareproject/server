@@ -37,7 +37,7 @@ setup(
     zip_safe=False,
     setup_requires=['setuptools_scm', 'pytest-runner'],
     use_scm_version=True,
-    install_requires=['nagare-commands', 'nagare-services'],
+    install_requires=['nagare-commands', 'nagare-services', 'nagare-services-logging'],
     tests_require=['pytest'],
     entry_points='''
     [console_scripts]
@@ -52,7 +52,9 @@ setup(
     serve = nagare.admin.app_serve:Serve
 
     [nagare.services]
-    application = nagare.server.applications:Application
+    local = nagare.local:Local
+    exceptions = nagare.services.base_exceptions_handler:Handler
     publisher = nagare.server.publishers:Publishers
+    application = nagare.server.applications:Application
     '''
 )

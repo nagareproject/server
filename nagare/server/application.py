@@ -9,58 +9,23 @@
 # this distribution.
 # --
 
-import os
-import sys
-
 from nagare.services import plugin
 
 
-class RequestHandlersChain(list):
-
-    def next(self, *args, **params):
-        return self.pop(0).handle_request(self, *args, **params)
-
-# ---------------------------------------------------------------------------
-
-
 class App(plugin.Plugin):
-    CONFIG_SPEC = {'simplified_exceptions': 'boolean(default=True)'}
+    CONFIG_SPEC = {'root': 'string(default="$root_path")', 'data': 'string(default="$data_path")'}
 
-    def __init__(self, name, dist, simplified_exceptions, services_service):
+    def __init__(self, name, dist, root, data):
         """Initialization
         """
-        self.name = name
+        super(App, self).__init__(name, dist)
+
         self.version = dist and dist.version
-        self.simplified_exceptions = simplified_exceptions
-        self.request_handlers = services_service.request_handlers.values()
+        self.root_path = root
+        self.data_path = data
 
     def handle_request(self, chain, **kw):
         return None
 
-    def handle_start(self, app):
-        return
-
     def handle_interactive(self):
         return {'app': self}
-
-    def __call__(self, **params):
-        try:
-            response = RequestHandlersChain(self.request_handlers).next(**params)
-        except Exception:
-            this_file = os.path.basename(__file__)
-
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-
-            tb = last_chain_seen = exc_traceback
-            while self.simplified_exceptions and tb:
-                filename = tb.tb_frame.f_code.co_filename
-                tb = tb.tb_next
-                if filename.endswith('/' + this_file):
-                    last_chain_seen = tb.tb_next
-
-            try:
-                raise exc_type, exc_value, last_chain_seen
-            finally:
-                del exc_traceback, last_chain_seen, tb
-
-        return response
