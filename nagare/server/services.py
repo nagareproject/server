@@ -7,32 +7,14 @@
 # this distribution.
 # --
 
-import os
-from collections import OrderedDict
-
 from nagare.services import services, plugin
 
 
 class Services(services.Services):
     ENTRY_POINT = 'nagare.services'
 
-    def merge_initial_config(self, config, **initial_config):
-        application_name = config.get('application', {}).get('name', '')
-        here = os.path.dirname(config.filename) if config.filename else ''
-
-        super(Services, self).merge_initial_config(
-            config,
-            application_name=application_name,
-            here=here,
-            **dict(os.environ, **initial_config)
-        )
-
     def handlers(self, attribute):
-        return OrderedDict(
-            (name, service)
-            for name, service in self.items()
-            if hasattr(service, attribute)
-        )
+        return [service for service in self.values() if hasattr(service, attribute)]
 
     @property
     def request_handlers(self):
@@ -46,18 +28,20 @@ class Services(services.Services):
     def interactive_handlers(self):
         return self.handlers('handle_interactive')
 
-    def display(self, criterias=lambda services, name, service: True):
-        super(Services, self).display(criterias=criterias)
+    def display(self, activated_columns=None, criterias=lambda services, name, service: True):
+        super(Services, self).display(activated_columns=activated_columns, criterias=criterias)
         print
 
         super(Services, self).display(
             'Request handlers',
+            activated_columns,
             lambda services, name, service: criterias(services, name, service) and hasattr(service, 'handle_request')
         )
         print
 
         super(Services, self).display(
             'Start handlers',
+            activated_columns,
             lambda services, name, service: criterias(services, name, service) and hasattr(service, 'handle_start')
         )
 
@@ -65,12 +49,13 @@ class Services(services.Services):
 
 
 class SelectionService(plugin.SelectionPlugin):
-    def __init__(self, name, dist, type, services_service, **config):
+
+    def __init__(self, name, dist, initial_config, type, services_service, **config):
         self.services = services_service
         super(SelectionService, self).__init__(name, dist, type, **config)
 
-    def _load_plugin(self, name, dist, plugin, config, *args, **kw):
-        return self.services(plugin, name, dist, *args, **dict(config, **kw))
+    def _load_plugin(self, name, dist, plugin, initial_config, config, *args, **kw):
+        return self.services(plugin, name, dist, **dict(config, **kw))
 
     @property
     def service(self):
