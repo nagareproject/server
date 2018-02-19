@@ -9,37 +9,33 @@
 # this distribution.
 # --
 
-from .services import SelectionService
+from nagare.server.services import SelectionService
 
 
 class Application(SelectionService):
     ENTRY_POINTS = 'nagare.applications'
     CONFIG_SPEC = {'name': 'string(default=None)'}
-    LOAD_PRIORITY = 2000
+    LOAD_PRIORITY = 1100
 
-    def __init__(self, name_, dist, name, services_service, **config):
-        services_service(super(Application, self).__init__, name_, dist, name)
+    def __init__(self, name_, dist, initial_config, name, services_service, **config):
+        services_service(super(Application, self).__init__, name, dist, initial_config, name)
 
-        self.name = name
+        self.initial_config = initial_config
         self.config = config
 
     @property
     def DESC(self):
         return 'Proxy to the <%s> application' % self.name
 
-    def load_plugins(*args, **config):
+    def load_plugins(*args, **kw):
         pass
 
     def create(self):
-        super(Application, self).load_plugins({self.name: self.config})
+        super(Application, self).load_plugins({self.name: self.config}, **self.initial_config)
         return self.service
 
-    def handle_start(self, *args, **kw):
-        if self.service is not None:
-            self.service.handle_start(*args, **kw)
+    def handle_request(self, chain, app, **params):
+        return self.service.handle_request(chain, **params)
 
-    def handle_request(self, *args, **kw):
-        return self.service.handle_request(*args, **kw)
-
-    def handle_interactive(self, *args, **kw):
-        return self.service.handle_interactive(*args, **kw)
+    def handle_interactive(self, *args, **params):
+        return self.service.handle_interactive(*args, **params)
