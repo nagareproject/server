@@ -37,7 +37,11 @@ setup(
     zip_safe=False,
     setup_requires=['setuptools_scm', 'pytest-runner'],
     use_scm_version=True,
-    install_requires=['nagare-commands', 'nagare-services', 'nagare-services-logging'],
+    install_requires=[
+        'backtrace',
+        'nagare-commands', 'nagare-services',
+        'nagare-services-logging'
+    ],
     tests_require=['pytest'],
     entry_points='''
     [console_scripts]
