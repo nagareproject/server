@@ -17,6 +17,7 @@ class RequestHandlersChain(list):
 
 
 class Publisher(plugin.Plugin):
+    INTERNAL_RELOADER = False
     has_multi_processes = has_multi_threads = False
 
     def __init__(self, name, dist, **config):
@@ -39,8 +40,11 @@ class Publisher(plugin.Plugin):
     def start_handle_request(self, app, **params):
         return RequestHandlersChain(self.request_handlers).next(app=app, **params)
 
-    def serve(self, services_service):
+    def serve(self, reloader_service=None, services_service=None, **params):
         self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
         app = services_service(self._create_app)
 
-        return self._serve(app, **self.config)
+        if reloader_service and not self.INTERNAL_RELOADER:
+            reloader_service.start()
+
+        return self._serve(app, **dict(self.config, **params))
