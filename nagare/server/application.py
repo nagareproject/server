@@ -24,6 +24,9 @@ class App(plugin.Plugin):
         self.root_path = root
         self.data_path = data
 
+    def handle_start(self):
+        pass
+
     def handle_request(self, chain, **kw):
         return None
 

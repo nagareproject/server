@@ -16,9 +16,6 @@ from nagare.admin import command
 class Serve(command.Command):
     DESC = 'Launch applications'
 
-    def run(self, publisher_service, services_service):
-        # ToDo: files_to_watch
+    def run(self, publisher_service, services_service, **kw):
         publisher = publisher_service.service
-        return services_service(publisher.serve)
-
-    start = run
+        return services_service(publisher.serve, **kw)

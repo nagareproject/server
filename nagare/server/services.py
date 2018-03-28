@@ -51,8 +51,15 @@ class Services(services.Services):
 class SelectionService(plugin.SelectionPlugin):
 
     def __init__(self, name, dist, initial_config, type, services_service, **config):
+        self.initial_config = initial_config
         self.services = services_service
+
         super(SelectionService, self).__init__(name, dist, type, **config)
+
+    def load_plugins(self, config, config_section=None, **initial_config):
+        initial_config.update(self.initial_config)
+
+        super(SelectionService, self).load_plugins(config, config_section, **initial_config)
 
     def _load_plugin(self, name, dist, plugin, initial_config, config, *args, **kw):
         return self.services(plugin, name, dist, **dict(config, **kw))

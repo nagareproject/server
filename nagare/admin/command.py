@@ -18,16 +18,85 @@ from nagare import commands
 from nagare.server.services import Services
 
 
+def find_path(choices, name):
+    choices = filter(None, choices + (os.getcwd(),))
+    if name:
+        choices = [os.path.join(dir, name) for dir in choices]
+
+    return next(dropwhile(lambda dir: not os.path.isdir(dir), choices), '')
+
+
+def get_roots(config_filename):
+
+    class Application(Services):
+        def __init__(self, *args, **kw):
+            self.app_name = self.package_path = self.module_path = None
+            super(Application, self).__init__(*args, **kw)
+
+        def read_config(self, spec, config, config_section, **initial_config):
+            config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
+            self.app_name = config.get('application', {'name': None}).get('name')
+
+            return config
+
+        def load_activated_plugins(self, activations=None):
+            if self.app_name:
+                entries = {entry.name: entry for entry in self.iter_entry_points()}
+                entry = entries[self.app_name]
+
+                import_path = entry.module_name.split('.')
+                if len(import_path) > 1:
+                    module = __import__('.'.join(import_path[:-1]))
+                    self.module_path = os.path.dirname(module.__file__)
+
+                self.package_path = os.path.join(entry.dist.location, self.app_name)
+
+            return []
+
+    application = Application(config_filename, '', 'nagare.applications')
+
+    return application.app_name, (application.package_path, application.module_path)
+
+# ---------------------------------------------------------------------------
+
+
 class Command(commands.Command):
     """The base class of all the commands"""
     WITH_CONFIG_FILENAME = True
     WITH_STARTED_SERVICES = False
 
-    def start(self, services_service, publisher_service=None, **params):
-        if self.WITH_STARTED_SERVICES and publisher_service:
-            services_service(publisher_service.create_app)
+    @staticmethod
+    def _create_service(config_filename, activated_by_default):
+        app_name, roots = get_roots(config_filename)
 
-        return services_service(self.run, **params)
+        root_path = find_path(roots, '')
+        data_path = find_path(roots, 'data')
+        static_path = find_path(roots, 'static')
+
+        return Services(
+            config_filename, '', 'nagare.services', activated_by_default,
+            app_name=app_name,
+            root=root_path, root_path=root_path,
+            data=data_path, data_path=data_path,
+            static=static_path, static_path=static_path,
+            here=os.path.dirname(config_filename) if config_filename else '',
+            config_filename=config_filename or '',
+            **os.environ
+        )
+
+    def _run(self, config_filename=None, **args):
+        config = Services().read_config(
+            {'activated_by_default': 'boolean(default=True)'},
+            config_filename, 'services'
+        )
+
+        services = self._create_service(config_filename, config['activated_by_default'])
+
+        publisher = services.get('publisher')
+        if self.WITH_STARTED_SERVICES and publisher:
+            services(publisher.create_app)
+
+        return services(self.run, **args)
 
     def set_arguments(self, parser):
         super(Command, self).set_arguments(parser)
@@ -56,72 +125,5 @@ class Command(commands.Command):
 # ---------------------------------------------------------------------------
 
 
-def find_path(choices, name):
-    choices = filter(None, choices + (os.getcwd(),))
-    if name:
-        choices = [os.path.join(dir, name) for dir in choices]
-
-    return next(dropwhile(lambda dir: not os.path.isdir(dir), choices), '')
-
-
-def get_roots(config_filename):
-
-    class Application(Services):
-        def __init__(self, *args, **kw):
-            self.app_name = self.package_path = self.module_path = None
-            super(Application, self).__init__(*args, **kw)
-
-        def read_config(self, spec, config, config_section, **initial_config):
-            config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
-            self.app_name = config['application']['name']
-            return config
-
-        def load_activated_plugins(self, entries, activations=None):
-            entries = {entry.name: entry for entry in entries}
-            entry = entries[self.app_name]
-
-            import_path = entry.module_name.split('.')
-            if len(import_path) > 1:
-                module = __import__('.'.join(import_path[:-1]))
-                self.module_path = os.path.dirname(module.__file__)
-
-            self.package_path = os.path.join(entry.dist.location, self.app_name)
-
-            return []
-
-    application = Application(config_filename, '', 'nagare.applications')
-
-    return application.app_name, (application.package_path, application.module_path)
-
-
-def run(args=None):
-    command, arguments = commands.ConsoleScript('nagare.commands')(args)
-    if command is None:
-        return 2
-
-    config_filename = arguments.pop('config_filename', None)
-
-    config = Services().read_config(
-        {'activated_by_default': 'boolean(default=True)'},
-        config_filename, 'services'
-    )
-
-    app_name, roots = get_roots(config_filename)
-
-    root_path = find_path(roots, '')
-    data_path = find_path(roots, 'data')
-    static_path = find_path(roots, 'static')
-
-    services = Services(
-        config_filename, '',
-        'nagare.services',
-        config['activated_by_default'],
-        app_name=app_name,
-        root=root_path, root_path=root_path,
-        data=data_path, data_path=data_path,
-        static=static_path, static_path=static_path,
-        here=os.path.dirname(config_filename) if config_filename else '',
-        **os.environ
-    )
-
-    return services(command.start, **arguments)
+def run():
+    return commands.run('nagare.commands')
