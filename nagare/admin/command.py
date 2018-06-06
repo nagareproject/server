@@ -18,6 +18,17 @@ from nagare import commands
 from nagare.commands import ArgumentError
 from nagare.server.services import Services
 
+BANNER = '''\
+   _   _
+  | \ | | __ _  __ _  __ _ _ __ ___
+  |  \| |/ _` |/ _` |/ _` | '__/ _ \
+  | |\  | (_| | (_| | (_| | | |  __/
+  |_| \_|\__,_|\__, |\__,_|_|  \___|
+               |___/
+
+                http://www.nagare.org\
+'''
+
 
 def find_path(choices, name):
     choices = filter(None, choices + (os.getcwd(),))
@@ -135,8 +146,17 @@ class Command(commands.Command):
 
         return parser, arguments
 
+
+class Commands(commands.Commands):
+    def usage(self, names, args):
+        print BANNER
+        print
+        print
+
+        return super(Commands, self).usage(names, args)
+
 # ---------------------------------------------------------------------------
 
 
 def run():
-    return commands.run(entry_points='nagare.commands').execute()
+    return Commands(entry_points='nagare.commands').execute()

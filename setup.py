@@ -20,8 +20,8 @@ if not (2, 7) <= sys.version_info[:2] < (3, 0):
     sys.exit(-2)
 
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as version:
-    LONG_DESCRIPTION = version.read()
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as description:
+    LONG_DESCRIPTION = description.read()
 
 
 setup(
@@ -49,7 +49,7 @@ setup(
 
     [nagare.commands]
     info = nagare.admin.info:Info
-    app = nagare.commands:Commands
+    app = nagare.admin.command:Commands
 
     [nagare.commands.app]
     info = nagare.admin.app_info:Info

@@ -1,4 +1,6 @@
-# --
+# Encoding: utf-8
+
+#  --
 # Copyright (c) 2008-2018 Net-ng.
 # All rights reserved.
 #
@@ -20,6 +22,9 @@ class Info(command.Command):
 
     @staticmethod
     def run():
+        print command.BANNER
+        print
+        print
         print sys.subversion[0], sys.version
         print
-        print 'Nagare server version', pkg_resources.get_distribution('nagare-server').version
+        print 'Nagare server - version', pkg_resources.get_distribution('nagare-server').version
