@@ -7,7 +7,10 @@
 # this distribution.
 # --
 
+import pkg_resources
+
 from nagare.admin import command
+from nagare.services import reporters
 
 
 class Info(command.Command):
@@ -42,13 +45,13 @@ class Info(command.Command):
         )
 
         parser.add_argument(
-            '-m', '--module', action='store_true',
-            help='Display the Python modules'
+            '-l', '--location', action='store_true',
+            help='Display the Python package locations'
         )
 
         parser.add_argument(
-            '-l', '--location', action='store_true',
-            help='Display the Python package locations'
+            '-m', '--module', action='store_true',
+            help='Display the Python modules'
         )
 
         parser.add_argument(
@@ -59,16 +62,20 @@ class Info(command.Command):
     @staticmethod
     def run(on, off, names, application_service, services_service, **columns):
         entry, _ = application_service.load_activated_plugins()[0]
-        print 'Application:'
-        print '  %s - %s' % (entry.dist.project_name, entry.dist.version)
-        print
+        print 'Application:  %s - %s\n' % (entry.dist.project_name, entry.dist.version)
 
         activated_columns = {name for name, activated in columns.items() if activated}
+
+        print 'Nagare packages:\n'
+        nagare_packages = [(dist,) for dist in pkg_resources.working_set if dist.project_name.startswith('nagare-')]
+        reporters.PackagesReporter().report({'package'} | activated_columns, nagare_packages)
+        print
 
         criterias = lambda services, name, _: (name in services) in (on, off)  # noqa: E731
 
         if names:
             criterias = lambda services, name, service, c=criterias: c(services, name, service) and (name in names)  # noqa: E731
 
-        services_service.display(activated_columns=activated_columns, criterias=criterias)
+        services_service.report(activated_columns=activated_columns, criterias=criterias)
+
         return 0
