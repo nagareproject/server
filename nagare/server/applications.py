@@ -18,7 +18,8 @@ class Application(services.SelectionService):
     LOAD_PRIORITY = 1100
 
     def __init__(self, name_, dist, initial_config, name, services_service, **config):
-        services_service(super(Application, self).__init__, name, dist, initial_config, name)
+        services_service(super(Application, self).__init__, name_, dist, initial_config, name)
+        self.app_name = name
         self.config = config
 
     @property
@@ -29,7 +30,7 @@ class Application(services.SelectionService):
         pass
 
     def create(self):
-        super(Application, self).load_plugins({self.name: self.config})
+        super(Application, self).load_plugins({self.app_name: self.config})
         return self.service
 
     def handle_request(self, chain, app, **params):
