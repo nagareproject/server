@@ -98,7 +98,7 @@ class Command(commands.Command):
             static=static_path, static_path=static_path,
             here=os.path.dirname(config_filename) if config_filename else '',
             config_filename=config_filename or '',
-            **os.environ
+            **{k: v.replace('$', '$$') for k, v in os.environ.iteritems()}
         )
 
     def _run(self, config_filename=None, **args):
