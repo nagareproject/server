@@ -11,10 +11,11 @@
 """
 
 import os
+import sys
 from itertools import dropwhile
 
 from nagare import commands
-
+from nagare.commands import ArgumentError
 from nagare.server.services import Services
 
 
@@ -60,6 +61,11 @@ def get_roots(config_filename):
 # ---------------------------------------------------------------------------
 
 
+class ArgumentParser(commands.ArgumentParser):
+    def format_help(self):
+        return BANNER + '\n\n\n' + super(ArgumentParser, self).format_help()
+
+
 class Command(commands.Command):
     """The base class of all the commands"""
     WITH_CONFIG_FILENAME = True
@@ -98,6 +104,9 @@ class Command(commands.Command):
 
         return services(self.run, **args)
 
+    def _create_parser(self, name):
+        return ArgumentParser(name, description=self.DESC)
+
     def set_arguments(self, parser):
         super(Command, self).set_arguments(parser)
 
@@ -105,25 +114,29 @@ class Command(commands.Command):
             parser.add_argument('config_filename', nargs='?', help='Configuration file')
 
     def parse(self, command_name, args):
-        arguments = super(Command, self).parse(command_name, args)
+        parser, arguments = super(Command, self).parse(command_name, args)
 
         if self.WITH_CONFIG_FILENAME:
-            config_filename = arguments['config_filename']
-            if config_filename is None:
-                config_filename = os.environ.get('NAGARE_CONF')
+            try:
+                config_filename = arguments['config_filename']
+                if config_filename is None:
+                    config_filename = os.environ.get('NAGARE_CONF')
 
-            if config_filename is None:
-                raise ValueError("config filename missing")
+                if config_filename is None:
+                    raise ArgumentError(message="config filename missing")
 
-            if not os.path.exists(config_filename):
-                raise ValueError("config filename <%s> doesn't exist" % config_filename)
+                if not os.path.exists(config_filename):
+                    raise ArgumentError(message="config filename <%s> doesn't exist" % config_filename)
 
-            arguments['config_filename'] = os.path.abspath(os.path.expanduser(config_filename))
+                arguments['config_filename'] = os.path.abspath(os.path.expanduser(config_filename))
+            except ArgumentError:
+                parser.print_usage(sys.stderr)
+                raise
 
-        return arguments
+        return parser, arguments
 
 # ---------------------------------------------------------------------------
 
 
 def run():
-    return commands.run('nagare.commands')
+    return commands.run(entry_points='nagare.commands').execute()
