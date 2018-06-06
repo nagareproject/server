@@ -20,8 +20,8 @@ from nagare.services import plugin
 from nagare.server import reference
 
 
-def default_handler(exception_handler, exception, **context):
-    exception_handler.log_exception()
+def default_handler(exception, exception_service, **context):
+    exception_service.log_exception()
     raise
 
 
@@ -40,7 +40,7 @@ class Handler(plugin.Plugin):
         'conservative': 'boolean(default=True)'
     }
 
-    def __init__(self, name, dist, simplified, propagation, handler, stderr, color, **backtrace_config):
+    def __init__(self, name, dist, simplified, propagation, handler, stderr, color, services_service, **backtrace_config):
         super(Handler, self).__init__(name, dist)
 
         self.simplified = simplified
@@ -49,6 +49,7 @@ class Handler(plugin.Plugin):
         self.handler = lambda exception, **params: handler(self, exception, **params)
         self.stderr = stderr
         self.color = color
+        self.services = services_service
         self.backtrace_config = backtrace_config
 
     def log_exception(self, to_stderr=True, logger_name='nagare.services.exception', exc_info=None):
@@ -84,4 +85,4 @@ class Handler(plugin.Plugin):
             if self.propagation:
                 raise
 
-            return self.handler(exception, **params)
+            return self.services(self.handler, exception, **params)
