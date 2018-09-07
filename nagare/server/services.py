@@ -30,14 +30,14 @@ class Services(services.Services):
 
     def report(self, activated_columns=None, criterias=lambda services, name, service: True):
         super(Services, self).report(activated_columns=activated_columns, criterias=criterias)
-        print
+        print('')
 
         super(Services, self).report(
             'Request handlers',
             activated_columns,
             lambda services, name, service: criterias(services, name, service) and hasattr(service, 'handle_request')
         )
-        print
+        print('')
 
         super(Services, self).report(
             'Start handlers',

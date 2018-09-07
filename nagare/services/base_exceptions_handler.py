@@ -9,12 +9,8 @@
 # this distribution.
 # --
 
-from __future__ import absolute_import
-
 import sys
-import traceback
 
-import backtrace
 from nagare import log
 from nagare.services import plugin
 from nagare.server import reference
@@ -31,28 +27,18 @@ class Handler(plugin.Plugin):
         'simplified': 'boolean(default=True)',
         'propagation': 'boolean(default=False)',
         'handler': 'string(default="nagare.services.base_exceptions_handler:default_handler")',
-        'stderr': 'boolean(default=True)',
-        'color': 'boolean(default=True)',
-        'reverse': 'boolean(default=False)',
-        'align': 'boolean(default=False)',
-        'strip_path': 'boolean(default=False)',
-        'on_tty': 'boolean(default=False)',
-        'conservative': 'boolean(default=True)'
     }
 
-    def __init__(self, name, dist, simplified, propagation, handler, stderr, color, services_service, **backtrace_config):
+    def __init__(self, name, dist, simplified, propagation, handler, services_service):
         super(Handler, self).__init__(name, dist)
 
         self.simplified = simplified
         self.propagation = propagation
         handler = reference.load_object(handler)[0]
         self.handler = lambda exception, **params: handler(self, exception, **params)
-        self.stderr = stderr
-        self.color = color
         self.services = services_service
-        self.backtrace_config = backtrace_config
 
-    def log_exception(self, to_stderr=True, logger_name='nagare.services.exception', exc_info=None):
+    def log_exception(self, logger_name='nagare.services.exceptions', exc_info=None):
         exc_type, exc_value, exc_traceback = exc_info or sys.exc_info()
 
         tb = last_chain_seen = exc_traceback
@@ -65,16 +51,8 @@ class Handler(plugin.Plugin):
         if not last_chain_seen:
             last_chain_seen = exc_traceback
 
-        exc_info = exc_type, exc_value, last_chain_seen
-
         logger = log.get_logger(logger_name)
-        logger.error('Unhandled exception', exc_info=exc_info)
-
-        if to_stderr and self.stderr:
-            if self.color:
-                backtrace.hook(tpe=exc_type, value=exc_value, tb=last_chain_seen, **self.backtrace_config)
-            else:
-                traceback.print_exception(*exc_info)
+        logger.error('Unhandled exception', exc_info=(exc_type, exc_value, last_chain_seen))
 
         del exc_info, exc_traceback, last_chain_seen, tb
 

@@ -7,10 +7,7 @@
 # this distribution.
 # --
 
-import pkg_resources
-
 from nagare.admin import command
-from nagare.services import reporters
 
 
 class Info(command.Command):
@@ -32,11 +29,6 @@ class Info(command.Command):
         parser.add_argument(
             '-n', '--name', action='append', dest='names',
             help='name of the service to display (can be specified multiple times)'
-        )
-
-        parser.add_argument(
-            '-p', '--package', action='store_true',
-            help='Display the Python packages'
         )
 
         parser.add_argument(
@@ -62,15 +54,9 @@ class Info(command.Command):
     @staticmethod
     def run(on, off, names, application_service, services_service, **columns):
         entry, _ = application_service.load_activated_plugins()[0]
-        print 'Application:  %s - %s\n' % (entry.dist.project_name, entry.dist.version)
+        print('Application:  %s - %s\n' % (entry.dist.project_name, entry.dist.version))
 
         activated_columns = {name for name, activated in columns.items() if activated}
-
-        print 'Nagare packages:\n'
-        nagare_packages = [(dist,) for dist in pkg_resources.working_set if dist.project_name.startswith('nagare-')]
-        reporters.PackagesReporter().report({'package'} | activated_columns, nagare_packages)
-        print
-
         criterias = lambda services, name, _: (name in services) in (on, off)  # noqa: E731
 
         if names:

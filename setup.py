@@ -10,14 +10,8 @@
 # --
 
 import os
-import sys
 
 from setuptools import setup, find_packages
-
-
-if not (2, 7) <= sys.version_info[:2] < (3, 0):
-    print 'Python version must be 2.7'
-    sys.exit(-2)
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as description:
@@ -35,20 +29,14 @@ setup(
     url='https://github.com/nagareproject/server',
     packages=find_packages(),
     zip_safe=False,
-    setup_requires=['setuptools_scm', 'pytest-runner'],
+    setup_requires=['setuptools_scm'],
     use_scm_version=True,
     install_requires=[
-        'backtrace',
-        'nagare-commands', 'nagare-services',
+        'nagare-services', 'nagare-commands-base',
         'nagare-services-logging'
     ],
-    tests_require=['pytest'],
     entry_points='''
-    [console_scripts]
-    nagare-admin = nagare.admin.command:run
-
     [nagare.commands]
-    info = nagare.admin.info:Info
     app = nagare.admin.command:Commands
     service = nagare.admin.command:Commands
 

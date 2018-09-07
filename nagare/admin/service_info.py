@@ -26,7 +26,7 @@ class Info(command.Command):
         services = [(name, service) for name, service in services_service.items() if fnmatch(name, service_pattern)]
 
         if not services:
-            print 'No service matching <%s>' % service_pattern
+            print('No service matching <%s>' % service_pattern)
             return 1
 
         for i, (name, service) in enumerate(sorted(services)):
