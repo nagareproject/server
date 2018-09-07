@@ -16,9 +16,8 @@ from nagare.services import plugin
 from nagare.server import reference
 
 
-def default_handler(exception, exception_service, **context):
-    exception_service.log_exception()
-    raise
+def default_handler(exception, exceptions_service, **context):
+    exceptions_service.log_exception()
 
 
 class Handler(plugin.Plugin):
@@ -35,7 +34,7 @@ class Handler(plugin.Plugin):
         self.simplified = simplified
         self.propagation = propagation
         handler = reference.load_object(handler)[0]
-        self.handler = lambda exception, **params: handler(self, exception, **params)
+        self.handler = lambda exception, services_service, **params: services_service(handler, exception, **params)
         self.services = services_service
 
     def log_exception(self, logger_name='nagare.services.exceptions', exc_info=None):

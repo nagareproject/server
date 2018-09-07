@@ -26,7 +26,7 @@ def get_roots(config_filename):
 
         def read_config(self, spec, config, config_section, **initial_config):
             config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
-            self.app_name = config.get('application', {'name': None}).get('name')
+            self.app_name = config.get('application', {'name': ''}).get('name')
 
             return config
 
@@ -60,10 +60,13 @@ class Command(admin.Command):
         data_path = admin.find_path(roots, 'data')
         static_path = admin.find_path(roots, 'static')
 
+        env_vars = dict({
+            'app_name': app_name,
+            'data': data_path, 'data_path': data_path,
+            'static': static_path, 'static_path': static_path
+        }, **vars)
+
         return super(Command, self)._create_service(
             config_filename, activated_by_default, roots,
-            app_name=app_name,
-            data=data_path, data_path=data_path,
-            static=static_path, static_path=static_path,
-            **vars
+            **env_vars
         )

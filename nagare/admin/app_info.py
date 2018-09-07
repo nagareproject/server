@@ -53,8 +53,10 @@ class Info(command.Command):
 
     @staticmethod
     def run(on, off, names, application_service, services_service, **columns):
-        entry, _ = application_service.load_activated_plugins()[0]
-        print('Application:  %s - %s\n' % (entry.dist.project_name, entry.dist.version))
+        application = application_service.load_activated_plugins()
+        if len(application):
+            entry, _ = application[0]
+            print('Application:  %s - %s\n' % (entry.dist.project_name, entry.dist.version))
 
         activated_columns = {name for name, activated in columns.items() if activated}
         criterias = lambda services, name, _: (name in services) in (on, off)  # noqa: E731
