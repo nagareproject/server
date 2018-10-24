@@ -31,10 +31,10 @@ def get_roots(config_filename):
             return config
 
         def load_activated_plugins(self, activations=None):
-            if self.app_name:
-                entries = {entry.name: entry for entry in self.iter_entry_points()}
-                entry = entries[self.app_name]
+            entries = {entry.name: entry for entry in self.iter_entry_points()}
+            entry = entries.get(self.app_name)
 
+            if entry is not None:
                 import_path = entry.module_name.split('.')
                 if len(import_path) > 1:
                     module = __import__('.'.join(import_path[:-1]))
@@ -54,7 +54,8 @@ class Command(admin.Command):
 
     SERVICES_FACTORY = Services
 
-    def _create_service(self, config_filename, activated_by_default, **vars):
+    @classmethod
+    def _create_service(cls, config, config_filename, activated_by_default, **vars):
         app_name, roots = get_roots(config_filename)
 
         data_path = admin.find_path(roots, 'data')
@@ -66,7 +67,7 @@ class Command(admin.Command):
             'static': static_path, 'static_path': static_path
         }, **vars)
 
-        return super(Command, self)._create_service(
-            config_filename, activated_by_default, roots,
+        return super(Command, cls)._create_service(
+            config, config_filename, activated_by_default, roots,
             **env_vars
         )

@@ -7,6 +7,8 @@
 # this distribution.
 # --
 
+from fnmatch import fnmatchcase
+
 from nagare.admin import command
 
 
@@ -28,7 +30,7 @@ class Info(command.Command):
 
         parser.add_argument(
             '-n', '--name', action='append', dest='names',
-            help='name of the service to display (can be specified multiple times)'
+            help='name of the service to display (can be specified multiple times and wildchars are allowed)'
         )
 
         parser.add_argument(
@@ -52,18 +54,23 @@ class Info(command.Command):
         )
 
     @staticmethod
-    def run(on, off, names, application_service, services_service, **columns):
+    def match_service(on, off, names, services, name):
+        matches = [fnmatchcase(name, pattern) for pattern in (names or ['*'])]
+
+        return ((name in services) in (on, off)) and any(matches)
+
+    @classmethod
+    def run(cls, on, off, names, application_service, services_service, **columns):
         application = application_service.load_activated_plugins()
         if len(application):
             entry, _ = application[0]
             print('Application:  %s - %s\n' % (entry.dist.project_name, entry.dist.version))
 
         activated_columns = {name for name, activated in columns.items() if activated}
-        criterias = lambda services, name, _: (name in services) in (on, off)  # noqa: E731
 
-        if names:
-            criterias = lambda services, name, service, c=criterias: c(services, name, service) and (name in names)  # noqa: E731
-
-        services_service.report(activated_columns=activated_columns, criterias=criterias)
+        services_service.report(
+            activated_columns=activated_columns,
+            criterias=lambda services, name, _: cls.match_service(on, off, names, services, name)
+        )
 
         return 0

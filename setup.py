@@ -38,14 +38,11 @@ setup(
     entry_points='''
     [nagare.commands]
     app = nagare.admin.command:Commands
-    service = nagare.admin.command:Commands
 
     [nagare.commands.app]
     info = nagare.admin.app_info:Info
+    config = nagare.admin.app_config:Config
     serve = nagare.admin.app_serve:Serve
-
-    [nagare.commands.service]
-    info = nagare.admin.service_info:Info
 
     [nagare.services]
     local = nagare.local:Local

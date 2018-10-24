@@ -14,7 +14,7 @@ from nagare.admin import command
 
 
 class Serve(command.Command):
-    DESC = 'Launch applications'
+    DESC = 'launch an application'
 
     def run(self, publisher_service, services_service, **kw):
         publisher = publisher_service.service

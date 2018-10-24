@@ -44,7 +44,7 @@ class Handler(plugin.Plugin):
         while self.simplified and tb:
             func_name = tb.tb_frame.f_code.co_name
             tb = tb.tb_next
-            if func_name == 'handle_request':
+            if (tb is not None) and (func_name == 'handle_request'):
                 last_chain_seen = tb
 
         if not last_chain_seen:
