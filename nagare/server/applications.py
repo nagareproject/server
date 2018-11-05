@@ -26,6 +26,16 @@ class Application(services.SelectionService):
     def DESC(self):
         return 'Proxy to the <%s> application' % self.name
 
+    def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
+        service, config = super(Application, self)._load_plugin(
+            name, dist,
+            plugin_cls, initial_config, config,
+            *args, **kw
+        )
+        service.plugin_category = 'nagare.applications'
+
+        return service, config
+
     def load_plugins(*args, **kw):
         pass
 

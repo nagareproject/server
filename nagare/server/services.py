@@ -63,9 +63,7 @@ class SelectionService(plugin.SelectionPlugin):
 
     def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
         config = dict(config, **kw)
-
         service = self.services(plugin_cls, name, dist, **config)
-        service.plugin_category = 'nagare.services'
 
         return service, config
 
