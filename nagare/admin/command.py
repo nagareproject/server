@@ -55,7 +55,7 @@ class Command(admin.Command):
     SERVICES_FACTORY = Services
 
     @classmethod
-    def _create_service(cls, config, config_filename, activated_by_default, **vars):
+    def _create_services(cls, config, config_filename, **vars):
         app_name, roots = get_roots(config_filename)
 
         data_path = admin.find_path(roots, 'data')
@@ -67,7 +67,7 @@ class Command(admin.Command):
             'static': static_path, 'static_path': static_path
         }, **vars)
 
-        return super(Command, cls)._create_service(
-            config, config_filename, activated_by_default, roots,
+        return super(Command, cls)._create_services(
+            config, config_filename, roots,
             **env_vars
         )
