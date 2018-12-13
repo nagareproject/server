@@ -32,7 +32,7 @@ class Thread(threading.local):
 
 
 class DummyLock(object):
-    acquire = release = lambda self: None
+    acquire = release = __enter__ = __exit__ = lambda *args: None
 
 
 class Process(object):
