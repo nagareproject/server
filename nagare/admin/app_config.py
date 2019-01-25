@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2018 Net-ng.
+# Copyright (c) 2008-2019 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -13,7 +13,7 @@ from nagare.admin import command
 
 
 class Config(command.Command):
-    DESC = 'services configuration'
+    DESC = 'display the services configuration'
     WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):

@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2018 Net-ng.
+# Copyright (c) 2008-2019 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -13,8 +13,12 @@
 import os
 
 from nagare.admin import admin
-from nagare.admin.admin import Commands  # noqa: F401
+from nagare.admin.admin import Commands
 from nagare.server.services import Services
+
+
+class AppCommands(Commands):
+    DESC = 'applications management subcommands'
 
 
 def get_roots(config_filename):

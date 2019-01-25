@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2018 Net-ng.
+# Copyright (c) 2008-2019 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -13,7 +13,7 @@ from nagare.admin import command
 
 
 class Info(command.Command):
-    DESC = 'information on an applications'
+    DESC = 'display application informations'
 
     def set_arguments(self, parser):
         super(Info, self).set_arguments(parser)

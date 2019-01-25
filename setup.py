@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2018 Net-ng.
+# Copyright (c) 2008-2019 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -37,7 +37,7 @@ setup(
     ],
     entry_points='''
     [nagare.commands]
-    app = nagare.admin.command:Commands
+    app = nagare.admin.command:AppCommands
 
     [nagare.commands.app]
     info = nagare.admin.app_info:Info
