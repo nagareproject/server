@@ -14,7 +14,7 @@ from nagare.server import services
 
 class Application(services.SelectionService):
     ENTRY_POINTS = 'nagare.applications'
-    CONFIG_SPEC = {'name': 'string(default=None)'}
+    CONFIG_SPEC = {'name': 'string(default=None, help="name of the application entry-point, registered under [nagare.applications]")'}
     LOAD_PRIORITY = 1100
 
     def __init__(self, name_, dist, initial_config, name, services_service, **config):
@@ -26,6 +26,20 @@ class Application(services.SelectionService):
     def DESC(self):
         return 'Proxy to the <%s> application' % self.name
 
+    @property
+    def plugin_spec(self):
+        if self.plugin is None:
+            self.create()
+
+        return super(Application, self).plugin_spec
+
+    @property
+    def plugin_config(self):
+        if self.plugin is None:
+            self.create()
+
+        return super(Application, self).plugin_config
+
     def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
         service, config = super(Application, self)._load_plugin(
             name, dist,
@@ -36,6 +50,7 @@ class Application(services.SelectionService):
 
         return service, config
 
+    @staticmethod
     def load_plugins(*args, **kw):
         pass
 
