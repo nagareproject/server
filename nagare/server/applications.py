@@ -55,6 +55,9 @@ class Application(services.SelectionService):
         pass
 
     def create(self):
+        if self.app_name is None:
+            self.raise_not_found()
+
         super(Application, self).load_plugins({self.app_name: self.config})
         return self.service
 
