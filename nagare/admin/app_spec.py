@@ -17,6 +17,7 @@ from nagare.admin import command
 
 class Spec(command.Command):
     DESC = 'display the services configuration help'
+    WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):
         parser.add_argument(

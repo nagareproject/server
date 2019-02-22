@@ -19,6 +19,7 @@ from nagare.admin import command
 
 class Config(command.Command):
     DESC = 'display the services configuration and extra informations'
+    WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):
         parser.add_argument(
@@ -84,7 +85,7 @@ class Config(command.Command):
             print('<empty>')
             return 1
 
-        config = OrderedDict((name, service.plugin_config) for name, service in services)
+        config = OrderedDict((name, dict(service.plugin_config, activated=True)) for name, service in services)
 
         if with_config:
             print('Configuration')
