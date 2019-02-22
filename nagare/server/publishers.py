@@ -15,6 +15,10 @@ class Publishers(services.SelectionService):
     CONFIG_SPEC = {'type': 'string(default=None, help="name of the publisher entry-point, registered under [nagare.publishers]")'}
     LOAD_PRIORITY = 20
 
+    @property
+    def DESC(self):
+        return 'Proxy to the <%s> publisher' % self.type
+
     def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
         service, config = super(Publishers, self)._load_plugin(
             name, dist,
@@ -27,7 +31,3 @@ class Publishers(services.SelectionService):
 
     def create_app(self, services_service):
         return services_service(self.service.create_app)
-
-    @property
-    def DESC(self):
-        return 'Proxy to the <%s> publisher' % self.type

@@ -19,20 +19,20 @@ class RequestHandlersChain(list):
 
 
 class Publisher(plugin.Plugin):
+    CONFIG_SPEC = dict(plugin.Plugin.CONFIG_SPEC, _app_name='string(default=$app_name)')
     has_multi_processes = has_multi_threads = False
 
-    def __init__(self, name, dist, **config):
-        super(Publisher, self).__init__(name, dist)
+    def __init__(self, name, dist, _app_name, **config):
+        super(Publisher, self).__init__(name, dist, **config)
 
-        self.config = config
+        self.app_name = _app_name
         self.request_handlers = []
 
     @staticmethod
     def monitor(reloader, reload_action):
         return reloader.monitor(reload_action) if reloader is not None else 0
 
-    @staticmethod
-    def create_app(application_service, services_service):
+    def create_app(self, application_service, services_service):
         app = services_service(application_service.create)
 
         for service in services_service.start_handlers:
@@ -42,18 +42,24 @@ class Publisher(plugin.Plugin):
 
     _create_app = create_app
 
+    def print_banner(self):
+        print(self.generate_banner())
+
+    def generate_banner(self):
+        return 'Serving application `{}`'.format(self.app_name)
+
     def start_handle_request(self, app, **params):
         return RequestHandlersChain(self.request_handlers).next(app=app, **params)
 
     def _serve(self, app, **params):
-        raise NotImplementedError()
+        self.print_banner()
 
-    def serve(self, reloader_service=None, services_service=None, **params):
+    def serve(self, services_service, reloader_service=None, **params):
         status = self.monitor(reloader_service, lambda reloader, path: os._exit(3))
         if status == 0:
             self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
             app = services_service(self._create_app)
 
-            status = services_service(self._serve, app, **dict(self.config, **params))
+            status = services_service(self._serve, app, **dict(self.plugin_config, **params))
 
         return status
