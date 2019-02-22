@@ -11,6 +11,7 @@
 """
 
 import os
+import imp
 
 from nagare.admin import admin
 from nagare.admin.admin import Commands
@@ -31,6 +32,7 @@ def get_roots(config_filename):
         def read_config(self, spec, config, config_section, **initial_config):
             config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
             self.app_name = config.get('application', {'name': ''}).get('name')
+            self.app_url = config.get('application', {'name': ''}).get('url', '')
 
             return config
 
@@ -39,10 +41,16 @@ def get_roots(config_filename):
             entry = entries.get(self.app_name)
 
             if entry is not None:
-                import_path = entry.module_name.split('.')
-                if len(import_path) > 1:
-                    module = __import__('.'.join(import_path[:-1]))
-                    self.module_path = os.path.dirname(module.__file__)
+                package_module = entry.module_name.rsplit('.', 1)
+                if len(package_module) == 1:
+                    module_name = package_module[0]
+                    paths = None
+                else:
+                    module_name = package_module[1]
+                    paths = __import__(package_module[0], fromlist=['']).__path__
+
+                module_path = imp.find_module(module_name, paths)[1]
+                self.module_path = os.path.dirname(module_path)
 
                 self.package_path = os.path.join(entry.dist.location, self.app_name)
 
@@ -50,7 +58,7 @@ def get_roots(config_filename):
 
     application = Application(config_filename, '', 'nagare.applications')
 
-    return application.app_name, (application.package_path, application.module_path)
+    return application.app_name, application.app_url, (application.package_path, application.module_path)
 
 
 class Command(admin.Command):
@@ -60,13 +68,14 @@ class Command(admin.Command):
 
     @classmethod
     def _create_services(cls, config, config_filename, **vars):
-        app_name, roots = get_roots(config_filename)
+        app_name, app_url, roots = get_roots(config_filename)
 
         data_path = admin.find_path(roots, 'data')
         static_path = admin.find_path(roots, 'static')
 
         env_vars = dict({
             'app_name': app_name,
+            'app_url': app_url,
             'data': data_path, 'data_path': data_path,
             'static': static_path, 'static_path': static_path
         }, **vars)
