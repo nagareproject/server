@@ -25,6 +25,10 @@ class Services(services.Services):
         return self.handlers('handle_start')
 
     @property
+    def reload_handlers(self):
+        return self.handlers('handle_reload')
+
+    @property
     def interactive_handlers(self):
         return self.handlers('handle_interactive')
 
