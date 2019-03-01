@@ -46,9 +46,6 @@ setup(
     serve = nagare.admin.app_serve:Serve
     spec = nagare.admin.app_spec:Spec2
 
-    [nagare.templates]
-    default = nagare.templates.default_rest:Template
-
     [nagare.services]
     local = nagare.local:Local
     exceptions = nagare.services.base_exceptions_handler:Handler
