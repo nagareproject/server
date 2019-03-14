@@ -18,6 +18,7 @@ from nagare.server import reference
 
 def default_handler(exception, exceptions_service, **context):
     exceptions_service.log_exception()
+    raise exception
 
 
 class Handler(plugin.Plugin):

@@ -51,16 +51,17 @@ class Process(object):
 class Local(plugin.Plugin):
     LOAD_PRIORITY = 40
 
-    def __init__(self, name, dist, publisher_service):
+    def __init__(self, name, dist, publisher_service=None):
         global worker, request
 
         super(Local, self).__init__(name, dist)
 
-        publisher = publisher_service.service
+        if publisher_service:
+            publisher = publisher_service.service
 
-        if publisher is not None:
-            worker = Thread() if publisher.has_multi_threads else Process()
-            request = Thread() if publisher.has_multi_threads else Process()
+            if publisher is not None:
+                worker = Thread() if publisher.has_multi_threads else Process()
+                request = Thread() if publisher.has_multi_threads else Process()
 
     @property
     def worker(self):
