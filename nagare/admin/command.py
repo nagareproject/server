@@ -26,7 +26,7 @@ def get_roots(config_filename):
 
     class Application(Services):
         def __init__(self, *args, **kw):
-            self.app_name = self.package_path = self.module_path = None
+            self.app_name = self.app_url = self.package_path = self.module_path = None
             super(Application, self).__init__(*args, **kw)
 
         def read_config(self, spec, config, config_section, **initial_config):

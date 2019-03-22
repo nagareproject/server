@@ -14,6 +14,7 @@ from itertools import chain, groupby
 from configobj import ConfigObj
 
 from nagare.services.config import Validator
+
 from nagare.admin import command
 
 

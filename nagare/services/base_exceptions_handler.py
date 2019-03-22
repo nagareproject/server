@@ -9,8 +9,6 @@
 # this distribution.
 # --
 
-import sys
-
 from nagare import log
 from nagare.services import plugin
 from nagare.server import reference
@@ -23,44 +21,23 @@ def default_handler(exception, exceptions_service, **context):
 
 class Handler(plugin.Plugin):
     LOAD_PRIORITY = 60
-    CONFIG_SPEC = {
-        'simplified': 'boolean(default=True)',
-        'propagation': 'boolean(default=False)',
-        'handler': 'string(default="nagare.services.base_exceptions_handler:default_handler")',
-    }
+    CONFIG_SPEC = dict(
+        plugin.Plugin.CONFIG_SPEC,
+        handler='string(default="nagare.services.base_exceptions_handler:default_handler")'
+    )
 
-    def __init__(self, name, dist, simplified, propagation, handler, services_service):
-        super(Handler, self).__init__(name, dist)
+    def __init__(self, name, dist, handler, services_service, **config):
+        services_service(super(Handler, self).__init__, name, dist, **config)
 
-        self.simplified = simplified
-        self.propagation = propagation
         handler = reference.load_object(handler)[0]
         self.handler = lambda exception, services_service, **params: services_service(handler, exception, **params)
         self.services = services_service
 
-    def log_exception(self, logger_name='nagare.services.exceptions', exc_info=None):
-        exc_type, exc_value, exc_traceback = exc_info or sys.exc_info()
-
-        tb = last_chain_seen = exc_traceback
-        while self.simplified and tb:
-            func_name = tb.tb_frame.f_code.co_name
-            tb = tb.tb_next
-            if (tb is not None) and (func_name == 'handle_request'):
-                last_chain_seen = tb
-
-        if not last_chain_seen:
-            last_chain_seen = exc_traceback
-
-        logger = log.get_logger(logger_name)
-        logger.error('Unhandled exception', exc_info=(exc_type, exc_value, last_chain_seen))
-
-        del exc_info, exc_traceback, last_chain_seen, tb
+    def log_exception(self, logger_name='nagare.services.exceptions', exc_info=True):
+        log.get_logger(logger_name).error('Unhandled exception', exc_info=exc_info)
 
     def handle_request(self, chain, **params):
         try:
             return chain.next(**params)
         except Exception as exception:
-            if self.propagation:
-                raise
-
             return self.services(self.handler, exception, **params)
