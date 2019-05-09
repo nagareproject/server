@@ -17,8 +17,8 @@ from nagare.services import plugin
 
 class App(plugin.Plugin):
     CONFIG_SPEC = {
-        'root': 'string(default="$root_path")',
-        'data': 'string(default="$data_path")',
+        '_root': 'string(default="$root")',
+        '_data': 'string(default="$data")',
         '_config_filename': 'string(default=$config_filename)',
         '_user_config_filename': 'string(default=$user_config_filename)'
     }
@@ -26,7 +26,7 @@ class App(plugin.Plugin):
     def __init__(
         self,
         name, dist,
-        root, data,
+        _root, _data,
         _config_filename, _user_config_filename,
         reloader_service=None
     ):
@@ -35,8 +35,8 @@ class App(plugin.Plugin):
         super(App, self).__init__(name, dist)
 
         self.version = dist and dist.version
-        self.root_path = root
-        self.data_path = data
+        self.root_path = _root
+        self.data_path = _data
 
         if reloader_service is not None:
             for module in sys.modules.values():
