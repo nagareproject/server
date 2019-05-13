@@ -64,8 +64,8 @@ class Application(services.SelectionService):
     def handle_request(self, chain, app, **params):
         return self.service.handle_request(chain, **params)
 
-    def handle_start(self, app):
-        self.service.handle_start()
+    def handle_start(self, app, services_service):
+        services_service(self.service.handle_start, app)
 
     def handle_interactive(self, *args, **params):
         return self.service.handle_interactive(*args, **params)

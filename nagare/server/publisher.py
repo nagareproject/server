@@ -36,7 +36,7 @@ class Publisher(plugin.Plugin):
         app = services_service(application_service.create)
 
         for service in services_service.start_handlers:
-            service.handle_start(app)
+            services_service(service.handle_start, app)
 
         return app
 

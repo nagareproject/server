@@ -28,11 +28,11 @@ class App(plugin.Plugin):
         name, dist,
         _root, _data,
         _config_filename, _user_config_filename,
-        reloader_service=None
+        reloader_service=None, **config
     ):
         """Initialization
         """
-        super(App, self).__init__(name, dist)
+        super(App, self).__init__(name, dist, **config)
 
         self.version = dist and dist.version
         self.root_path = _root
@@ -48,7 +48,7 @@ class App(plugin.Plugin):
             reloader_service.watch_file(_config_filename)
             reloader_service.watch_file(_user_config_filename)
 
-    def handle_start(self):
+    def handle_start(self, app):
         pass
 
     def handle_request(self, chain, **kw):
