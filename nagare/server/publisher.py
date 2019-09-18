@@ -54,6 +54,8 @@ class Publisher(plugin.Plugin):
     def _serve(self, app, **params):
         self.print_banner()
 
+        return None
+
     def serve(self, services_service, reloader_service=None, **params):
         status = self.monitor(reloader_service, lambda reloader, path: os._exit(3))
         if status == 0:

@@ -14,30 +14,38 @@ from nagare.services import plugin
 from nagare.server import reference
 
 
-def default_handler(exception, exceptions_service, **context):
+def default_exception_handler(exception, exceptions_service, **context):
     exceptions_service.log_exception()
-    return 0
+
+    if getattr(exception, 'commit_transaction', False):
+        return exception
+    else:
+        raise exception
 
 
-class Handler(plugin.Plugin):
-    LOAD_PRIORITY = 60
+class Exceptions(plugin.Plugin):
+    LOAD_PRIORITY = 25
     CONFIG_SPEC = dict(
         plugin.Plugin.CONFIG_SPEC,
-        handler='string(default="nagare.services.base_exceptions_handler:default_handler")'
+        exception_handler='string(default="nagare.services.base_exceptions_handler:default_exception_handler")'
     )
 
-    def __init__(self, name, dist, handler, services_service, **config):
-        services_service(super(Handler, self).__init__, name, dist, **config)
+    def __init__(self, name, dist, exception_handler, services_service, **config):
+        services_service(super(Exceptions, self).__init__, name, dist, **config)
 
-        handler = reference.load_object(handler)[0]
-        self.handler = lambda exception, services_service, **params: services_service(handler, exception, **params)
+        exception_handler = reference.load_object(exception_handler)[0]
+        self.exception_handler = lambda exception, params: services_service(exception_handler, exception, **params)
         self.services = services_service
 
-    def log_exception(self, logger_name='nagare.services.exceptions', exc_info=True):
+    @staticmethod
+    def log_exception(logger_name='nagare.services.exceptions', exc_info=True):
         log.get_logger(logger_name).error('Unhandled exception', exc_info=exc_info)
+
+    def handle_exception(self, exception, params):
+        return self.services(self.exception_handler, exception, params)
 
     def handle_request(self, chain, **params):
         try:
             return chain.next(**params)
         except Exception as exception:
-            return self.services(self.handler, exception, **params)
+            return self.handle_exception(exception, params)
