@@ -35,22 +35,22 @@ class Info(command.Command):
 
         parser.add_argument(
             '-v', '--version', action='store_true',
-            help='Display the Python package versions'
+            help='display the Python package versions'
         )
 
         parser.add_argument(
             '-l', '--location', action='store_true',
-            help='Display the Python package locations'
+            help='display the Python package locations'
         )
 
         parser.add_argument(
             '-m', '--module', action='store_true',
-            help='Display the Python modules'
+            help='display the Python modules'
         )
 
         parser.add_argument(
             '-d', '--description', action='store_true',
-            help='Display the plugin description'
+            help='display the plugin description'
         )
 
     @staticmethod
