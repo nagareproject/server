@@ -23,7 +23,7 @@ def default_exception_handler(exception, exceptions_service, **context):
         raise exception
 
 
-class Exceptions(plugin.Plugin):
+class ExceptionsService(plugin.Plugin):
     LOAD_PRIORITY = 25
     CONFIG_SPEC = dict(
         plugin.Plugin.CONFIG_SPEC,
@@ -31,7 +31,7 @@ class Exceptions(plugin.Plugin):
     )
 
     def __init__(self, name, dist, exception_handler, services_service, **config):
-        services_service(super(Exceptions, self).__init__, name, dist, **config)
+        services_service(super(ExceptionsService, self).__init__, name, dist, **config)
 
         exception_handler = reference.load_object(exception_handler)[0]
         self.exception_handler = lambda exception, params: services_service(exception_handler, exception, **params)

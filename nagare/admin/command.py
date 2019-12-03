@@ -47,7 +47,7 @@ def get_roots(config_filename):
                     paths = None
                 else:
                     module_name = package_module[1]
-                    paths = __import__(package_module[0], fromlist=['']).__path__
+                    paths = list(__import__(package_module[0], fromlist=['']).__path__)
 
                 module_path = imp.find_module(module_name, paths)[1]
                 self.module_path = os.path.dirname(module_path)

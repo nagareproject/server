@@ -48,7 +48,7 @@ setup(
 
     [nagare.services]
     local = nagare.local:Local
-    exceptions = nagare.services.base_exceptions_handler:Exceptions
+    exceptions = nagare.services.base_exceptions_handler:ExceptionsService
     publisher = nagare.server.publishers:Publishers
     application = nagare.server.applications:Application
     '''
