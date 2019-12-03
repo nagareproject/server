@@ -46,7 +46,8 @@ class App(plugin.Plugin):
                     reloader_service.watch_file(filename[:-1] if filename.endswith(('.pyc', '.pyo')) else filename)
 
             reloader_service.watch_file(_config_filename)
-            reloader_service.watch_file(_user_config_filename)
+            if os.path.isfile(_user_config_filename):
+                reloader_service.watch_file(_user_config_filename)
 
     def handle_start(self, app):
         pass
