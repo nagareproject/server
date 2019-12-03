@@ -20,7 +20,6 @@ from nagare.admin import command
 
 class Config(command.Command):
     DESC = 'display the services configuration and extra informations'
-    WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):
         parser.add_argument(
@@ -80,7 +79,9 @@ class Config(command.Command):
         return r
 
     @classmethod
-    def run(cls, names, with_config, with_info, not_modified, modified, services_service):
+    def run(cls, names, with_config, with_info, not_modified, modified, application_service, services_service):
+        services_service(application_service.create)
+
         services = sorted((name, service) for name, service in services_service.items() if cls.match_service(names, name))
         if not services:
             print('<empty>')

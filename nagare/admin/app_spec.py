@@ -17,7 +17,6 @@ from nagare.admin import command
 
 class Spec(command.Command):
     DESC = 'display the services configuration help'
-    WITH_STARTED_SERVICES = True
 
     def set_arguments(self, parser):
         parser.add_argument(
@@ -36,7 +35,9 @@ class Spec(command.Command):
         return {}
 
     @classmethod
-    def run(cls, names, services_service):
+    def run(cls, names, application_service, services_service):
+        services_service(application_service.create)
+
         config_spec = sorted(
             (name, dict(spec, activated='boolean(default=True)'))
             for name, spec in cls.merge_config_specs(services_service)
