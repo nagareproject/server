@@ -35,8 +35,9 @@ class Spec(command.Command):
         return {}
 
     @classmethod
-    def run(cls, names, application_service, services_service):
-        services_service(application_service.create)
+    def run(cls, names, services_service, application_service=None):
+        if application_service is not None:
+            services_service(application_service.create)
 
         config_spec = sorted(
             (name, dict(spec, activated='boolean(default=True)'))
