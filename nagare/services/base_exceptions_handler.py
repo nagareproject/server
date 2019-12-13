@@ -33,16 +33,15 @@ class ExceptionsService(plugin.Plugin):
     def __init__(self, name, dist, exception_handler, services_service, **config):
         services_service(super(ExceptionsService, self).__init__, name, dist, **config)
 
-        exception_handler = reference.load_object(exception_handler)[0]
-        self.exception_handler = lambda exception, params: services_service(exception_handler, exception, **params)
         self.services = services_service
+        self.exception_handler = reference.load_object(exception_handler)[0]
 
     @staticmethod
     def log_exception(logger_name='nagare.services.exceptions', exc_info=True):
         log.get_logger(logger_name).error('Unhandled exception', exc_info=exc_info)
 
     def handle_exception(self, exception, params):
-        return self.services(self.exception_handler, exception, params)
+        return self.services(self.exception_handler, exception, **params)
 
     def handle_request(self, chain, **params):
         try:
