@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2019 Net-ng.
+# Copyright (c) 2008-2020 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -66,10 +66,7 @@ class SelectionService(plugin.SelectionPlugin):
         super(SelectionService, self).load_plugins(config, config_section, **initial_config)
 
     def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
-        config = dict(config, **kw)
-        service = self.services(plugin_cls, name, dist, **config)
-
-        return service, config
+        return self.services(plugin_cls, name, dist, **dict(config, **kw))
 
     @property
     def service(self):

@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2019 Net-ng.
+# Copyright (c) 2008-2020 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -31,7 +31,12 @@ class ExceptionsService(plugin.Plugin):
     )
 
     def __init__(self, name, dist, exception_handler, services_service, **config):
-        services_service(super(ExceptionsService, self).__init__, name, dist, **config)
+        services_service(
+            super(ExceptionsService, self).__init__,
+            name, dist,
+            exception_handle=exception_handler,
+            **config
+        )
 
         self.services = services_service
         self.exception_handler = reference.load_object(exception_handler)[0]

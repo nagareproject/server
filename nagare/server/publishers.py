@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2019 Net-ng.
+# Copyright (c) 2008-2020 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -20,14 +20,14 @@ class Publishers(services.SelectionService):
         return 'Proxy to the <%s> publisher' % self.type
 
     def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
-        service, config = super(Publishers, self)._load_plugin(
+        service = super(Publishers, self)._load_plugin(
             name, dist,
             plugin_cls, initial_config, config,
             *args, **kw
         )
         service.plugin_category = 'nagare.publishers'
 
-        return service, config
+        return service
 
     def create_app(self, services_service):
         return services_service(self.service.create_app)

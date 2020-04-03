@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2019 Net-ng.
+# Copyright (c) 2008-2020 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -38,17 +38,17 @@ class Application(services.SelectionService):
         if self.plugin is None:
             self.create()
 
-        return super(Application, self).plugin_config
+        return dict(super(Application, self).plugin_config, name=self.app_name)
 
     def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
-        service, config = super(Application, self)._load_plugin(
+        service = super(Application, self)._load_plugin(
             name, dist,
             plugin_cls, initial_config, config,
             *args, **kw
         )
         service.plugin_category = 'nagare.applications'
 
-        return service, config
+        return service
 
     @staticmethod
     def load_plugins(*args, **kw):
