@@ -16,6 +16,7 @@ from nagare.services import plugin
 
 
 class App(plugin.Plugin):
+    PLUGIN_CATEGORY = 'nagare.applications'
     CONFIG_SPEC = {
         '_root': 'string(default="$root")',
         '_data': 'string(default="$data")',

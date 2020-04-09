@@ -46,7 +46,6 @@ class Application(services.SelectionService):
             plugin_cls, initial_config, config,
             *args, **kw
         )
-        service.plugin_category = 'nagare.applications'
 
         return service
 

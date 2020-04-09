@@ -19,6 +19,7 @@ class RequestHandlersChain(list):
 
 
 class Publisher(plugin.Plugin):
+    PLUGIN_CATEGORY = 'nagare.publishers'
     CONFIG_SPEC = dict(plugin.Plugin.CONFIG_SPEC, _app_name='string(default=$app_name)')
     has_multi_processes = has_multi_threads = False
 
