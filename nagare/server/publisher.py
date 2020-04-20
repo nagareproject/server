@@ -30,8 +30,13 @@ class Publisher(plugin.Plugin):
         self.request_handlers = []
 
     @staticmethod
-    def monitor(reloader, reload_action):
-        return reloader.monitor(reload_action) if reloader is not None else 0
+    def monitor(reload_action, reloader_service, services_service):
+        if reloader_service is None:
+            status = 0
+        else:
+            status = services_service(reloader_service.monitor, reload_action)
+
+        return status
 
     def create_app(self, application_service, services_service):
         app = services_service(application_service.create)
@@ -58,7 +63,7 @@ class Publisher(plugin.Plugin):
         return None
 
     def serve(self, services_service, reloader_service=None, **params):
-        status = self.monitor(reloader_service, lambda reloader, path: os._exit(3))
+        status = services_service(self.monitor, lambda reloader, path: os._exit(3))
         if status == 0:
             self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
             app = services_service(self._create_app)
