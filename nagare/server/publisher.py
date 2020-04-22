@@ -30,7 +30,7 @@ class Publisher(plugin.Plugin):
         self.request_handlers = []
 
     @staticmethod
-    def monitor(reload_action, reloader_service, services_service):
+    def monitor(reload_action, services_service, reloader_service=None):
         if reloader_service is None:
             status = 0
         else:
