@@ -32,7 +32,8 @@ def get_roots(config_filename):
         def read_config(self, spec, config, config_section, **initial_config):
             config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
             self.app_name = config.get('application', {'name': ''}).get('name')
-            self.app_url = config.get('application', {'name': ''}).get('url', self.app_name)
+            app_url = config.get('application', {'name': ''}).get('url', self.app_name)
+            self.app_url = app_url and ('/' + app_url)
 
             return config
 
