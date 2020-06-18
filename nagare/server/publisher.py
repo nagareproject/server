@@ -49,7 +49,7 @@ class Publisher(plugin.Plugin):
     _create_app = create_app
 
     def print_banner(self):
-        print(self.generate_banner())
+        self.logger.info(self.generate_banner())
 
     def generate_banner(self):
         return 'Serving application `{}`'.format(self.app_name)
