@@ -14,6 +14,7 @@ import os
 import imp
 
 from nagare.admin import admin
+from nagare.admin.admin import Banner  # noqa: F401
 from nagare.admin.admin import Commands
 from nagare.server.services import Services
 
@@ -32,7 +33,7 @@ def get_roots(config_filename):
         def read_config(self, spec, config, config_section, **initial_config):
             config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
             self.app_name = config.get('application', {'name': ''}).get('name')
-            app_url = config.get('application', {'name': ''}).get('url', self.app_name)
+            app_url = config.get('application', {'name': ''}).get('url', '')
             self.app_url = app_url and ('/' + app_url)
 
             return config
