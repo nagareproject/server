@@ -8,6 +8,7 @@
 # --
 
 import os
+import random
 
 from nagare.services import plugin
 
@@ -63,6 +64,8 @@ class Publisher(plugin.Plugin):
         return None
 
     def serve(self, services_service, reloader_service=None, **params):
+        random.seed(None)
+
         status = services_service(self.monitor, lambda reloader, path: os._exit(3))
         if status == 0:
             self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
