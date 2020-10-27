@@ -40,7 +40,7 @@ class App(plugin.Plugin):
         self.data_path = _data
 
         if reloader_service is not None:
-            for module in sys.modules.values():
+            for module in list(sys.modules.values()):
                 filename = getattr(module, '__file__', None)
                 if filename and ('lib/python' not in filename.lower()):
                     filename = os.path.abspath(filename)
