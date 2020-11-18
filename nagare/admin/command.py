@@ -32,9 +32,13 @@ def get_roots(config_filename):
 
         def read_config(self, spec, config, config_section, **initial_config):
             config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
-            self.app_name = config.get('application', {'name': ''}).get('name')
-            app_url = config.get('application', {'name': ''}).get('url', '')
+            application = config.get('application', {})
+
+            self.app_name = application.get('name', '')
+            app_url = application.get('url', '')
             self.app_url = app_url and ('/' + app_url)
+            self.data = application.get('data')
+            self.static = application.get('static')
 
             return config
 
@@ -60,7 +64,10 @@ def get_roots(config_filename):
 
     application = Application(config_filename, '', 'nagare.applications')
 
-    return application.app_name, application.app_url, (application.package_path, application.module_path)
+    return application.app_name, application.app_url, application.data, application.static, (
+        application.package_path,
+        application.module_path
+    )
 
 
 class Command(admin.Command):
@@ -70,10 +77,10 @@ class Command(admin.Command):
 
     @classmethod
     def _create_services(cls, config, config_filename, **vars):
-        app_name, app_url, roots = get_roots(config_filename)
+        app_name, app_url, data, static, roots = get_roots(config_filename)
 
-        data_path = admin.find_path(roots, 'data')
-        static_path = admin.find_path(roots, 'static')
+        data_path = data or admin.find_path(roots, 'data')
+        static_path = static or admin.find_path(roots, 'static')
 
         env_vars = dict({
             'app_name': app_name,
