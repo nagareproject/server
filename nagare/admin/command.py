@@ -32,10 +32,18 @@ def get_roots(config_filename):
 
         def read_config(self, spec, config, config_section, **initial_config):
             config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
-            application = config.get('application', {})
+            application = super(Application, self).read_config(
+                spec,
+                config.get('application', {}),
+                config_section,
+                **dict(
+                    {k: v.replace('$', '$$') for k, v in os.environ.items()},
+                    **initial_config
+                )
+            )
 
             self.app_name = application.get('name', '')
-            app_url = application.get('url', '')
+            app_url = application.get('url', '').strip('/')
             self.app_url = app_url and ('/' + app_url)
             self.data = application.get('data')
             self.static = application.get('static')
