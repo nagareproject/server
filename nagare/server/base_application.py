@@ -17,12 +17,13 @@ from nagare.services import plugin
 
 class App(plugin.Plugin):
     PLUGIN_CATEGORY = 'nagare.applications'
-    CONFIG_SPEC = {
-        '_root': 'string(default="$root")',
-        '_data': 'string(default="$data")',
-        '_config_filename': 'string(default=$config_filename)',
-        '_user_config_filename': 'string(default=$user_config_filename)'
-    }
+    CONFIG_SPEC = dict(
+        plugin.Plugin.CONFIG_SPEC,
+        _root='string(default="$root")',
+        _data='string(default="$data")',
+        _config_filename='string(default=$config_filename)',
+        _user_config_filename='string(default=$user_config_filename)'
+    )
 
     def __init__(
         self,

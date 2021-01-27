@@ -14,7 +14,11 @@ from nagare.server import services
 
 class Application(services.SelectionService):
     ENTRY_POINTS = 'nagare.applications'
-    CONFIG_SPEC = {'name': 'string(default=None, help="name of the application entry-point, registered under [nagare.applications]")'}
+    CONFIG_SPEC = dict(
+        services.SelectionService.CONFIG_SPEC,
+        name='string(default=None, help="name of the application entry-point, registered under [nagare.applications]")'
+    )
+    del CONFIG_SPEC['type']
     LOAD_PRIORITY = 1100
 
     def __init__(self, name_, dist, initial_config, name, services_service, **config):

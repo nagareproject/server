@@ -12,7 +12,10 @@ from nagare.server import services
 
 class Publishers(services.SelectionService):
     ENTRY_POINTS = 'nagare.publishers'
-    CONFIG_SPEC = {'type': 'string(default=None, help="name of the publisher entry-point, registered under [nagare.publishers]")'}
+    CONFIG_SPEC = dict(
+        services.SelectionService.CONFIG_SPEC,
+        type='string(default=None, help="name of the publisher entry-point, registered under [nagare.publishers]")'
+    )
     LOAD_PRIORITY = 20
 
     @property
