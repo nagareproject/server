@@ -87,14 +87,14 @@ class Config(command.Command):
             print('<empty>')
             return 1
 
-        config = OrderedDict((name, dict(service.plugin_config, activated=True)) for name, service in services)
+        config = OrderedDict((name, service.plugin_config) for name, service in services)
 
         if with_config:
             print('Configuration')
             print('-------------')
 
             if not_modified or modified:
-                spec = {name: dict(service.plugin_spec, activated='boolean(default=True)') for name, service in services}
+                spec = {name: service.plugin_spec for name, service in services}
                 config = cls.compare(Validator(), spec, config, not_modified, modified)
 
             lines = ConfigObj(config).write()

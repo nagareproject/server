@@ -7,8 +7,8 @@
 # this distribution.
 # --
 
-import collections
 from fnmatch import fnmatchcase
+from collections import OrderedDict
 from itertools import chain, groupby
 
 from configobj import ConfigObj
@@ -39,16 +39,18 @@ class Spec(command.Command):
         if application_service is not None:
             services_service(application_service.create)
 
-        config_spec = sorted(
-            (name, dict(spec, activated='boolean(default=True)'))
-            for name, spec in cls.merge_config_specs(services_service)
+        config_spec = cls.merge_config_specs(services_service)
+        config_spec.pop('activated', None)
+        config_spec = OrderedDict(
+            (name, spec)
+            for name, spec in config_spec.items()
             if cls.match_service(names, name)
         )
         if not config_spec:
             print('<empty>')
             return 1
 
-        lines = ConfigObj(collections.OrderedDict(config_spec)).write()
+        lines = ConfigObj(config_spec).write()
         for section, lines in groupby(lines, lambda l: l.lstrip().startswith('[')):
             lines = chain([''], lines) if section else sorted(lines)
             for line in lines:
@@ -64,12 +66,11 @@ class Spec1(Spec):
     @classmethod
     def merge_config_specs(cls, services_service):
         plugins = cls._create_services(None, None).load_activated_plugins()
-
-        return [(entry.name, plugin.CONFIG_SPEC) for entry, plugin in plugins]
+        return OrderedDict(sorted(((entry.name, plugin.get_plugin_spec()) for entry, plugin in plugins)))
 
 
 class Spec2(Spec):
 
     @classmethod
     def merge_config_specs(cls, services_service):
-        return [(name, service.plugin_spec) for name, service in services_service.items()]
+        return services_service.plugin_spec
