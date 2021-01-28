@@ -7,9 +7,6 @@
 # this distribution.
 # --
 
-import os
-import random
-
 from nagare.services import plugin
 
 
@@ -30,15 +27,6 @@ class Publisher(plugin.Plugin):
         self.app_name = _app_name
         self.request_handlers = []
 
-    @staticmethod
-    def monitor(reload_action, services_service, reloader_service=None):
-        if reloader_service is None:
-            status = 0
-        else:
-            status = services_service(reloader_service.monitor, reload_action)
-
-        return status
-
     def create_app(self, application_service, services_service):
         app = services_service(application_service.create)
 
@@ -47,7 +35,13 @@ class Publisher(plugin.Plugin):
 
         return app
 
-    _create_app = create_app
+    def _create_app(self, application_service, services_service):
+        app = services_service(self.create_app)
+
+        for service in services_service.serve_handlers:
+            services_service(service.handle_serve, app)
+
+        return app
 
     def print_banner(self):
         self.logger.info(self.generate_banner())
@@ -58,19 +52,13 @@ class Publisher(plugin.Plugin):
     def start_handle_request(self, app, **params):
         return RequestHandlersChain(self.request_handlers).next(app=app, **params)
 
-    def _serve(self, app, **params):
+    def _serve(self, app):
         self.print_banner()
 
         return None
 
-    def serve(self, services_service, reloader_service=None, **params):
-        random.seed(None)
+    def serve(self, services_service):
+        self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
 
-        status = services_service(self.monitor, lambda reloader, path: os._exit(3))
-        if status == 0:
-            self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
-            app = services_service(self._create_app)
-
-            status = services_service(self._serve, app, **dict(self.plugin_config, **params))
-
-        return status
+        app = services_service(self._create_app)
+        return services_service(self._serve, app, **self.plugin_config)
