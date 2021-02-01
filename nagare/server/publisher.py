@@ -7,6 +7,8 @@
 # this distribution.
 # --
 
+import os
+
 from nagare.services import plugin
 
 
@@ -26,6 +28,15 @@ class Publisher(plugin.Plugin):
 
         self.app_name = _app_name
         self.request_handlers = []
+
+    @staticmethod
+    def monitor(reload_action, services_service, reloader_service=None):
+        if reloader_service is None:
+            status = 0
+        else:
+            status = services_service(reloader_service.monitor, reload_action)
+
+        return status
 
     def create_app(self, application_service, services_service):
         app = services_service(application_service.create)
@@ -52,13 +63,17 @@ class Publisher(plugin.Plugin):
     def start_handle_request(self, app, **params):
         return RequestHandlersChain(self.request_handlers).next(app=app, **params)
 
-    def _serve(self, app):
+    def _serve(self, app, **params):
         self.print_banner()
 
         return None
 
-    def serve(self, services_service):
-        self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
+    def serve(self, services_service, reloader_service=None):
+        status = services_service(self.monitor, lambda reloader, path: os._exit(3))
+        if status == 0:
+            self.request_handlers = [service.handle_request for service in reversed(services_service.request_handlers)]
+            app = services_service(self._create_app)
 
-        app = services_service(self._create_app)
-        return services_service(self._serve, app, **self.plugin_config)
+            status = services_service(self._serve, app, **self.plugin_config)
+
+        return status
