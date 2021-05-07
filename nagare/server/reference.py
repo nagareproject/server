@@ -58,6 +58,14 @@ def load_app(app, _=None):
     return load_entry_point(app, 'nagare.applications')
 
 
+def load_service(service, _=None):
+    return load_entry_point(service, 'nagare.services')
+
+
+def load_publisher(publisher, _=None):
+    return load_entry_point(publisher, 'nagare.publishers')
+
+
 def load_egg(dist, app):
     """Load a registered application of a distribution
 
@@ -113,7 +121,9 @@ loaders = {
     'python': load_module,
     'egg': load_egg,
     'file': load_file,
-    'app': load_app
+    'app': load_app,
+    'service': load_service,
+    'publisher': load_publisher
 }
 
 
