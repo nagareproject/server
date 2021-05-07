@@ -17,6 +17,7 @@ from nagare.admin import admin
 from nagare.admin.admin import Banner  # noqa: F401
 from nagare.admin.admin import Commands
 from nagare.server.services import Services
+from pkg_resources import iter_entry_points
 
 
 class AppCommands(Commands):
@@ -48,6 +49,10 @@ def get_roots(config_filename):
             self.data = application.get('data')
             self.static = application.get('static')
 
+            applications = {entry.name: entry.dist for entry in iter_entry_points('nagare.applications')}
+            application = applications[self.app_name]
+            self.app_version = application.version
+
             return config
 
         def load_activated_plugins(self, activations=None):
@@ -72,7 +77,7 @@ def get_roots(config_filename):
 
     application = Application(config_filename, '', 'nagare.applications')
 
-    return application.app_name, application.app_url, application.data, application.static, (
+    return application.app_name, application.app_version, application.app_url, application.data, application.static, (
         application.package_path,
         application.module_path
     )
@@ -85,13 +90,14 @@ class Command(admin.Command):
 
     @classmethod
     def _create_services(cls, config, config_filename, **vars):
-        app_name, app_url, data, static, roots = get_roots(config_filename)
+        app_name, app_version, app_url, data, static, roots = get_roots(config_filename)
 
         data_path = data or admin.find_path(roots, 'data')
         static_path = static or admin.find_path(roots, 'static')
 
         env_vars = dict({
             'app_name': app_name,
+            'app_version': app_version,
             'app_url': app_url,
             'data': data_path,
             'static': static_path,
