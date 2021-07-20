@@ -7,50 +7,110 @@
 # this distribution.
 # --
 
+from functools import reduce
+
 from nagare.services import services, plugin
 
 
+class RequestHandlersChain(list):
+
+    def next(self, **params):
+        return self.pop()(self, **params)
+
+
 class Services(services.Services):
-    ENTRY_POINT = 'nagare.services'
 
-    def handlers(self, attribute):
-        return [service for service in self.values() if hasattr(service, attribute)]
+    def __init__(self, *args, **kw):
+        super(Services, self).__init__(*args, **kw)
+        self.request_handlers = [lambda chain, response, **params: response]
 
-    @property
-    def request_handlers(self):
-        return self.handlers('handle_request')
+    @staticmethod
+    def _has_handler(service, handle_name):
+        return getattr(
+            service,
+            'has_{}_handler'.format(handle_name),
+            hasattr(service, 'handle_{}'.format(handle_name))
+        )
 
-    @property
-    def start_handlers(self):
-        return self.handlers('handle_start')
+    def handlers(self, handle_name):
+        return [service for service in self.values() if self._has_handler(service, handle_name)]
 
-    @property
-    def reload_handlers(self):
-        return self.handlers('handle_reload')
-
-    @property
-    def serve_handlers(self):
-        return self.handlers('handle_serve')
+    def has_handler(self, handle_name):
+        return bool(self.handlers(handle_name))
 
     @property
-    def interactive_handlers(self):
-        return self.handlers('handle_interactive')
+    def has_serve_handler(self):
+        return self.has_handler('serve')
 
-    def report(self, activated_columns=None, criterias=lambda services, name, service: True):
-        super(Services, self).report(activated_columns=activated_columns, criterias=criterias)
-        print('')
+    @property
+    def has_start_handler(self):
+        return self.has_handler('start')
 
+    @property
+    def has_request_handler(self):
+        return self.has_handler('request')
+
+    @property
+    def has_reload_handler(self):
+        return self.has_handler('reload')
+
+    @property
+    def has_interaction_handler(self):
+        return self.has_handler('interaction')
+
+    # -----------------------------------------------------------------------------------------------------------------
+
+    def handle_serve(self, app):
+        for service in self.handlers('serve'):
+            self(service.handle_serve, app)
+
+    def handle_start(self, app, services_service):
+        self.request_handlers += [service.handle_request for service in reversed(self.handlers('request'))]
+
+        for service in self.handlers('start'):
+            (services_service or self)(service.handle_start, app)
+
+    def create_request_handlers_chain(self):
+        return self.request_handlers
+
+    def handle_request(self, _, **params):
+        return RequestHandlersChain(self.create_request_handlers_chain()).next(**params)
+
+    def handle_reload(self):
+        for service in self.handlers('reload'):
+            service.handle_reload()
+
+    def handle_interaction(self):
+        namespaces = [service.handle_interaction() for service in self.handlers('interaction')]
+        return reduce(lambda d, new: dict(d, **new), namespaces, {})
+
+    # -----------------------------------------------------------------------------------------------------------------
+
+    def report(self, name, activated_columns=None, criterias=lambda *args: True, entry_points=None):
         super(Services, self).report(
-            'Request handlers',
+            name,
+            'Services',
             activated_columns,
-            lambda services, name, service: criterias(services, name, service) and hasattr(service, 'handle_request')
+            criterias,
+            entry_points
         )
         print('')
 
         super(Services, self).report(
+            name,
+            'Request handlers',
+            activated_columns,
+            lambda *args: criterias(*args) and self._has_handler(args[-1], 'request'),
+            entry_points,
+        )
+        print('')
+
+        super(Services, self).report(
+            name,
             'Start handlers',
             activated_columns,
-            lambda services, name, service: criterias(services, name, service) and hasattr(service, 'handle_start')
+            lambda *args: criterias(*args) and self._has_handler(args[-1], 'start'),
+            entry_points,
         )
 
         return 0
@@ -58,20 +118,20 @@ class Services(services.Services):
 
 class SelectionService(plugin.SelectionPlugin):
 
-    def __init__(self, name, dist, initial_config, type, services_service, **config):
-        self.initial_config = initial_config
+    def __init__(self, name_, dist, type, services_service, **config):
         self.services = services_service
+        super(SelectionService, self).__init__(name_, dist, type, **config)
 
-        super(SelectionService, self).__init__(name, dist, type, **config)
+    def _load_plugin(self, name_, dist, plugin_cls, **config):
+        config = config.copy()
+        del config[self.SELECTOR]
 
-    def load_plugins(self, config, config_section=None, **initial_config):
-        initial_config.update(self.initial_config)
-
-        super(SelectionService, self).load_plugins(config, config_section, **initial_config)
-
-    def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
-        return self.services(plugin_cls, name, dist, **dict(config, **kw))
+        return self.services(plugin_cls, name_, dist, **config)
 
     @property
     def service(self):
         return self.plugin
+
+
+class NagareServices(Services):
+    ENTRY_POINTS = 'nagare.services'

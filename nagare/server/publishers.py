@@ -20,16 +20,7 @@ class Publishers(services.SelectionService):
 
     @property
     def DESC(self):
-        return 'Proxy to the <%s> publisher' % self.type
-
-    def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
-        service = super(Publishers, self)._load_plugin(
-            name, dist,
-            plugin_cls, initial_config, config,
-            *args, **kw
-        )
-
-        return service
+        return 'Proxy to the <%s> publisher' % self.selector
 
     def create_app(self, services_service):
         return services_service(self.service.create_app)

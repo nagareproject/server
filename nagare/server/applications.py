@@ -9,11 +9,13 @@
 # this distribution.
 # --
 
+from nagare.config import config_from_dict
 from nagare.server import services
 
 
 class Application(services.SelectionService):
     ENTRY_POINTS = 'nagare.applications'
+    SELECTOR = 'name'
     CONFIG_SPEC = dict(
         services.SelectionService.CONFIG_SPEC,
         name='string(default=None, help="name of the application entry-point, registered under [nagare.applications]")'
@@ -21,47 +23,23 @@ class Application(services.SelectionService):
     del CONFIG_SPEC['type']
     LOAD_PRIORITY = 1100
 
-    def __init__(self, name_, dist, initial_config, name, services_service, **config):
-        services_service(super(Application, self).__init__, name_, dist, initial_config, name)
-        self.app_name = name
-        self.config = config
+    def __init__(self, name_, dist, name, services_service, **config):
+        services_service(super(Application, self).__init__, name_, dist, name, **config)
 
     @property
     def DESC(self):
-        return 'Proxy to the <%s> application' % self.name
+        return 'Proxy to the <%s> application' % self.selector
 
-    @property
-    def plugin_spec(self):
-        if self.plugin is None:
-            self.create()
-
-        return super(Application, self).plugin_spec
-
-    @property
-    def plugin_config(self):
-        if self.plugin is None:
-            self.create()
-
-        return dict(super(Application, self).plugin_config, name=self.app_name)
-
-    def _load_plugin(self, name, dist, plugin_cls, initial_config, config, *args, **kw):
-        service = super(Application, self)._load_plugin(
-            name, dist,
-            plugin_cls, initial_config, config,
-            *args, **kw
-        )
-
-        return service
-
-    @staticmethod
+    @classmethod
     def load_plugins(*args, **kw):
         pass
 
     def create(self):
-        if self.app_name is None:
-            self.raise_not_found()
+        global_config = self.plugin_config.pop('_global_config')
+        config = {self.SELECTOR: self.selector, self.name: self.plugin_config}
 
-        super(Application, self).load_plugins({self.app_name: self.config})
+        super(Application, self).load_plugins(self.name, config_from_dict(config), global_config)
+
         return self.service
 
     def handle_request(self, chain, app, **params):
@@ -70,5 +48,5 @@ class Application(services.SelectionService):
     def handle_start(self, app, services_service):
         services_service(self.service.handle_start, app)
 
-    def handle_interactive(self, *args, **params):
-        return self.service.handle_interactive(*args, **params)
+    def handle_interaction(self, *args, **params):
+        return self.service.handle_interaction(*args, **params)

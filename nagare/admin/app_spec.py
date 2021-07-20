@@ -7,16 +7,19 @@
 # this distribution.
 # --
 
+from itertools import starmap
 from fnmatch import fnmatchcase
-from collections import OrderedDict
-from itertools import chain, groupby
 
-from configobj import ConfigObj
 from nagare.admin import command
+from nagare.config import config_from_dict
 
 
 class Spec(command.Command):
     DESC = 'display the services configuration help'
+
+    def __init__(self, name, dist, **config):
+        self.config = None
+        super(Spec, self).__init__(name, dist, **config)
 
     def set_arguments(self, parser):
         parser.add_argument(
@@ -28,49 +31,58 @@ class Spec(command.Command):
 
     @staticmethod
     def match_service(names, name):
-        return any(fnmatchcase(name, pattern) for pattern in (names or ['*']))
+        if not names:
+            return True
 
-    @staticmethod
-    def merge_config_specs(services_service):
-        return {}
+        for pattern in names:
+            if len(pattern) != len(name):
+                continue
 
-    @classmethod
-    def run(cls, names, services_service, application_service=None):
+            if all(starmap(fnmatchcase, zip(name, pattern))):
+                return True
+
+        return False
+
+    def _create_services(self, config, config_filename):
+        self.config = config
+        return super(Spec, self)._create_services(config, config_filename)
+
+    def run(self, names, services_service, application_service=None):
+        names = [name.split('/') for name in (names or [])]
+
         if application_service is not None:
             services_service(application_service.create)
 
-        config_spec = cls.merge_config_specs(services_service)
-        config_spec.pop('activated', None)
-        config_spec = OrderedDict(
-            (name, spec)
-            for name, spec in config_spec.items()
-            if cls.match_service(names, name)
-        )
-        if not config_spec:
+        def extract_infos(spec, ancestors=()):
+            infos = {}
+
+            for f, args in spec:
+                name, config_spec, children = f(*args)
+                fullname = ancestors + (name,)
+
+                if self.match_service(names, fullname):
+                    infos[name] = config_spec
+
+                info = extract_infos(children, fullname)
+                if info:
+                    infos[name] = dict(config_spec, **info)
+
+            return infos
+
+        spec = extract_infos(services_service.walk1('services', 'nagare.services', self.config or {}))
+        if not spec:
             print('<empty>')
             return 1
 
-        lines = ConfigObj(config_spec).write()
-        for section, lines in groupby(lines, lambda l: l.lstrip().startswith('[')):
-            lines = chain([''], lines) if section else sorted(lines)
-            for line in lines:
-                if not line.lstrip().startswith('_'):
-                    print(line)
+        spec = config_from_dict(spec)
+        spec.display(4, filter_parameter=lambda param: (param == '___many___') or (not param.startswith('_')))
 
         return 0
 
 
-class Spec1(Spec):
+class Spec2(Spec):
     WITH_CONFIG_FILENAME = False
 
-    @classmethod
-    def merge_config_specs(cls, services_service):
-        plugins = cls._create_services(None, None).load_activated_plugins()
-        return OrderedDict(sorted(((entry.name, plugin.get_plugin_spec()) for entry, plugin in plugins)))
-
-
-class Spec2(Spec):
-
-    @classmethod
-    def merge_config_specs(cls, services_service):
-        return services_service.plugin_spec
+    def _create_services(self, config, config_filename):
+        self.config = config
+        return self.SERVICES_FACTORY()

@@ -21,8 +21,8 @@ class App(plugin.Plugin):
         plugin.Plugin.CONFIG_SPEC,
         _root='string(default="$root")',
         _data='string(default="$data")',
-        _config_filename='string(default=$config_filename)',
-        _user_config_filename='string(default=$user_config_filename)'
+        _config_filename='string(default="$config_filename")',
+        _user_config_filename='string(default="$user_config_filename")'
     )
 
     def __init__(
@@ -57,5 +57,5 @@ class App(plugin.Plugin):
     def handle_request(self, chain, **kw):
         return None
 
-    def handle_interactive(self):
+    def handle_interaction(self):
         return {'app': self}

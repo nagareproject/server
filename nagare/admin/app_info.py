@@ -7,6 +7,7 @@
 # this distribution.
 # --
 
+from itertools import starmap
 from fnmatch import fnmatchcase
 
 from nagare.admin import command
@@ -54,23 +55,34 @@ class Info(command.Command):
         )
 
     @staticmethod
-    def match_service(on, off, names, services, name):
-        matches = [fnmatchcase(name, pattern) for pattern in (names or ['*'])]
+    def match_service(on, off, names, name, activated):
+        if (activated is not None) in (on, off):
+            if not names:
+                return True
 
-        return ((name in services) in (on, off)) and any(matches)
+            for pattern in names:
+                if len(pattern) != len(name):
+                    continue
+
+                if all(starmap(fnmatchcase, zip(name, pattern))):
+                    return True
+
+        return False
 
     @classmethod
     def run(cls, on, off, names, application_service, services_service, **columns):
-        application = application_service.load_activated_plugins()
-        if len(application):
-            entry, _ = application[0]
-            print('Application:  %s - %s\n' % (entry.dist.project_name, entry.dist.version))
+        config = {application_service.SELECTOR: application_service.selector}
+        applications = application_service.iter_entry_points('', application_service.ENTRY_POINTS, config)
+        if len(applications) == 1:
+            _, entry = applications[0]
+            print('Application: {} - version {}\n'.format(entry.dist.project_name, entry.dist.version))
 
+        names = [name.split('/') for name in (names or [])]
         activated_columns = {name for name, activated in columns.items() if activated}
-
         services_service.report(
-            activated_columns=activated_columns,
-            criterias=lambda services, name, _: cls.match_service(on, off, names, services, name)
+            'services',
+            activated_columns,
+            lambda entry, fullname, name, plugin_cls, plugin: cls.match_service(on, off, names, fullname, plugin)
         )
 
         return 0

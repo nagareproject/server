@@ -7,34 +7,24 @@
 # this distribution.
 # --
 
+from itertools import starmap
 from fnmatch import fnmatchcase
-from collections import OrderedDict
-from itertools import chain, groupby
-
-from configobj import ConfigObj
-
-from nagare.services.config import Validator
 
 from nagare.admin import command
+from nagare.config import config_from_dict
 
 
 class Config(command.Command):
     DESC = 'display the services configuration and extra informations'
 
+    def __init__(self, name=None, dist=None, **config):
+        super(Config, self).__init__(name, dist, **config)
+        self.raw_config = None
+
     def set_arguments(self, parser):
         parser.add_argument(
             '-n', '--name', action='append', dest='names',
             help='name of the service to display (can be specified multiple times and wildchars are allowed)'
-        )
-
-        parser.add_argument(
-            '-c', '--config', action='store_false', dest='with_info',
-            help='only display the configuration'
-        )
-
-        parser.add_argument(
-            '-i', '--info', action='store_false', dest='with_config',
-            help='only display the extra informations'
         )
 
         parser.add_argument(
@@ -51,72 +41,105 @@ class Config(command.Command):
 
     @staticmethod
     def match_service(names, name):
-        return any(fnmatchcase(name, pattern) for pattern in (names or ['*']))
+        if not names:
+            return True
 
-    @classmethod
-    def compare(cls, validator, spec, config, not_modified, modified):
-        r = {}
-        for k, v in config.items():
-            check = spec.get(k)
-            if check is None:
-                if modified:
-                    r[k] = v
+        for pattern in names:
+            if len(pattern) != len(name):
                 continue
 
+            if all(starmap(fnmatchcase, zip(name, pattern))):
+                return True
+
+        return False
+
+    @classmethod
+    def compare(cls, config1, config2):
+        r = {}
+
+        for k, v in config2.items():
             if isinstance(v, dict):
-                v = cls.compare(validator, check, v, not_modified, modified)
+                v = cls.compare(config1.get(k, {}), v)
                 if v:
                     r[k] = v
             else:
-                try:
-                    default = validator.get_default_value(check)
-                except KeyError:
-                    continue
-
-                if (modified and (v != default)) or (not_modified and (v == default)):
+                if k not in config1:
                     r[k] = v
 
         return r
 
-    @classmethod
-    def run(cls, names, with_config, with_info, not_modified, modified, application_service, services_service):
-        services_service(application_service.create)
+    def run(self, names, not_modified, modified, application_service, services_service):
+        names = [name.split('/') for name in (names or [])]
 
-        services = sorted((name, service) for name, service in services_service.items() if cls.match_service(names, name))
-        if not services:
+        if modified:
+
+            def extract_infos(config, ancestors=()):
+                infos = {}
+
+                for k, v in config.items():
+                    fullname = ancestors + (k,)
+
+                    if self.match_service(names, fullname):
+                        infos[k] = v
+
+                    if isinstance(v, dict):
+                        info = extract_infos(v, fullname)
+                        if info:
+                            infos[k] = info
+
+                return infos
+
+            config = extract_infos(self.raw_config)
+        else:
+            services_service(application_service.create)
+
+            def extract_infos(config, ancestors=()):
+                infos = {}
+
+                for f, (entry, name, cls, plugin, children) in config:
+                    if plugin is None:
+                        continue
+
+                    children = list(children)
+                    children_names = set(child[1][1] for child in children)
+                    fullname = ancestors + (name,)
+
+                    if (plugin is not None) and self.match_service(names, fullname):
+                        infos[name] = {
+                            children_name: config
+                            for children_name, config in plugin.plugin_config.items()
+                            if children_name not in children_names
+                        }
+
+                    info = extract_infos(children, fullname)
+                    if info:
+                        config = {
+                            children_name: config
+                            for children_name, config in plugin.plugin_config.items()
+                            if children_name not in children_names
+                        }
+                        infos[name] = dict(config, **info)
+
+                return infos
+
+            config = extract_infos(services_service.walk2('services', services_service.ENTRY_POINTS))
+            if not_modified:
+                config = self.compare(self.raw_config, config)
+
+        if not config:
             print('<empty>')
             return 1
 
-        config = OrderedDict((name, service.plugin_config) for name, service in services)
+        print('Configuration')
+        print('-------------')
 
-        if with_config:
-            print('Configuration')
-            print('-------------')
-
-            if not_modified or modified:
-                spec = {name: service.plugin_spec for name, service in services}
-                config = cls.compare(Validator(), spec, config, not_modified, modified)
-
-            lines = ConfigObj(config).write()
-
-            for section, lines in groupby(lines, lambda l: l.lstrip().startswith('[')):
-                lines = chain([''], lines) if section else sorted(lines)
-                for line in lines:
-                    if not line.lstrip().startswith('_'):
-                        print(line)
-
-        if with_info:
-            for name, service in services:
-                info = '\n'.join(service.format_info())
-                if not info:
-                    continue
-
-                print('')
-                title = "Service '{}'".format(name)
-                print(title)
-                print('-' * len(title))
-                print('')
-
-                print(info)
+        config_from_dict(config).display(
+            4,
+            filter_parameter=lambda param: (param == '___many___') or (not param.startswith('_'))
+        )
 
         return 0
+
+    def _create_services(self, config, config_filename):
+        self.raw_config = config.dict()
+        return super(Config, self)._create_services(config, config_filename)

@@ -16,66 +16,68 @@ import imp
 from nagare.admin import admin
 from nagare.admin.admin import Banner  # noqa: F401
 from nagare.admin.admin import Commands
-from nagare.server.services import Services
-from pkg_resources import iter_entry_points
+from nagare.config import InterpolationError
+from nagare.server.services import Services, NagareServices
 
 
 class AppCommands(Commands):
     DESC = 'applications management subcommands'
 
 
-def get_roots(config_filename):
+def get_roots(config, global_config):
 
     class Application(Services):
-        def __init__(self, *args, **kw):
-            self.app_name = self.app_url = self.data = self.static = self.package_path = self.module_path = None
-            super(Application, self).__init__(*args, **kw)
 
-        def read_config(self, spec, config, config_section, **initial_config):
-            config = super(Application, self).read_config(spec, config, config_section, False, **initial_config)
-            application = super(Application, self).read_config(
-                spec,
-                config.get('application', {}),
-                config_section,
-                **dict(
-                    {k: v.replace('$', '$$') for k, v in os.environ.items()},
-                    **initial_config
-                )
-            )
+        def __init__(self):
+            self.app_name = self.app_version = self.app_url = self.data = self.static = None
+            self.package_path = self.module_path = None
 
-            self.app_name = application.get('name', '')
-            app_url = application.get('url', '').strip('/')
-            self.app_url = app_url and ('/' + app_url)
-            self.data = application.get('data')
-            self.static = application.get('static')
+            super(Application, self).__init__()
 
-            applications = {entry.name: entry.dist for entry in iter_entry_points('nagare.applications')}
-            application = applications[self.app_name]
-            self.app_version = application.version
+        def load_plugins(self, config, global_config):
+            # Ignore all substituion errors
+            class D(dict):
+                def get(self, name):
+                    return super(D, self).get(name, '')
 
-            return config
+            application = config['application']
+            application_ori = application.dict()
+            try:
+                application.interpolate(D(global_config), ancestors_names=('application',))
+            except InterpolationError:
+                pass
 
-        def load_activated_plugins(self, activations=None):
-            entries = {entry.name: entry for entry in self.iter_entry_points()}
-            entry = entries.get(self.app_name)
+            self.app_name = application.get('name')
+            if self.app_name:
+                application_ori['name'] = self.app_name
 
-            if entry is not None:
-                package_module = entry.module_name.rsplit('.', 1)
-                if len(package_module) == 1:
-                    module_name = package_module[0]
-                    paths = None
-                else:
-                    module_name = package_module[1]
-                    paths = list(__import__(package_module[0], fromlist=['']).__path__)
+                app_url = application.get('url', '').strip('/')
+                self.app_url = app_url and ('/' + app_url)
+                self.data = application.get('data')
+                self.static = application.get('static')
 
-                module_path = imp.find_module(module_name, paths)[1]
-                self.module_path = os.path.dirname(module_path)
+                entries = dict(super(Application, self).iter_entry_points('application', 'nagare.applications', config))
+                entry = entries.get(self.app_name)
+                if entry is not None:
+                    self.app_version = entry.dist.version
 
-                self.package_path = os.path.join(entry.dist.location, self.app_name)
+                    package_module = entry.module_name.rsplit('.', 1)
+                    if len(package_module) == 1:
+                        module_name = package_module[0]
+                        paths = None
+                    else:
+                        module_name = package_module[1]
+                        paths = list(__import__(package_module[0], fromlist=['']).__path__)
 
-            return []
+                    module_path = imp.find_module(module_name, paths)[1]
+                    self.module_path = os.path.dirname(module_path)
+                    self.package_path = os.path.join(entry.dist.location, self.app_name)
 
-    application = Application(config_filename, '', 'nagare.applications')
+            application.from_dict(application_ori)
+
+    application = Application()
+    if config is not None:
+        application.load_plugins(config, global_config)
 
     return application.app_name, application.app_version, application.app_url, application.data, application.static, (
         application.package_path,
@@ -86,22 +88,26 @@ def get_roots(config_filename):
 class Command(admin.Command):
     """The base class of all the commands"""
 
-    SERVICES_FACTORY = Services
+    SERVICES_FACTORY = NagareServices
 
     @classmethod
-    def _create_services(cls, config, config_filename, **vars):
-        app_name, app_version, app_url, data, static, roots = get_roots(config_filename)
+    def _create_services(cls, config, config_filename):
+        global_config = {k: v.replace('$', '$$') for k, v in os.environ.items()}
+        if config_filename:
+            global_config['here'] = os.path.dirname(config_filename)
+
+        app_name, app_version, app_url, data, static, roots = get_roots(config, global_config)
 
         data_path = data or admin.find_path(roots, 'data')
         static_path = static or admin.find_path(roots, 'static')
 
-        env_vars = dict({
+        global_config.update({
             'app_name': app_name,
             'app_version': app_version,
             'app_url': app_url,
             'data': data_path,
             'static': static_path,
             '_static_path': static_path
-        }, **vars)
+        })
 
-        return super(Command, cls)._create_services(config, config_filename, roots, **env_vars)
+        return super(Command, cls)._create_services(config, config_filename, roots, global_config)
