@@ -39,6 +39,10 @@ class Config(command.Command):
 
         super(Config, self).set_arguments(parser)
 
+    def _create_services(self, config, config_filename):
+        self.raw_config = config.dict()
+        return super(Config, self)._create_services(config, config_filename, create_application=True)
+
     @staticmethod
     def match_service(names, name):
         if not names:
@@ -91,7 +95,6 @@ class Config(command.Command):
 
             config = extract_infos(self.raw_config)
         else:
-            services_service(application_service.create)
 
             def extract_infos(config, ancestors=()):
                 infos = {}
@@ -139,7 +142,3 @@ class Config(command.Command):
         )
 
         return 0
-
-    def _create_services(self, config, config_filename):
-        self.raw_config = config.dict()
-        return super(Config, self)._create_services(config, config_filename)

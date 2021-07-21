@@ -91,7 +91,7 @@ class Command(admin.Command):
     SERVICES_FACTORY = NagareServices
 
     @classmethod
-    def _create_services(cls, config, config_filename):
+    def _create_services(cls, config, config_filename, create_application=False):
         global_config = {k: v.replace('$', '$$') for k, v in os.environ.items()}
         if config_filename:
             global_config['here'] = os.path.dirname(config_filename)
@@ -110,4 +110,4 @@ class Command(admin.Command):
             '_static_path': static_path
         })
 
-        return super(Command, cls)._create_services(config, config_filename, roots, global_config)
+        return super(Command, cls)._create_services(config, config_filename, roots, global_config, create_application)

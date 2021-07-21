@@ -45,13 +45,10 @@ class Spec(command.Command):
 
     def _create_services(self, config, config_filename):
         self.config = config
-        return super(Spec, self)._create_services(config, config_filename)
+        return super(Spec, self)._create_services(config, config_filename, create_application=True)
 
     def run(self, names, services_service, application_service=None):
         names = [name.split('/') for name in (names or [])]
-
-        if application_service is not None:
-            services_service(application_service.create)
 
         def extract_infos(spec, ancestors=()):
             infos = {}
@@ -73,6 +70,9 @@ class Spec(command.Command):
         if not spec:
             print('<empty>')
             return 1
+
+        print('Configuration specification')
+        print('---------------------------')
 
         spec = config_from_dict(spec)
         spec.display(4, filter_parameter=lambda param: (param == '___many___') or (not param.startswith('_')))
