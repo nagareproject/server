@@ -32,7 +32,7 @@ class Application(services.SelectionService):
 
     @staticmethod
     def _walk(o, name, entry_points, config, get_children):
-        if '_global_config' in config:
+        if '_initial_config' in config:
             entries = o.iter_entry_points(name, entry_points, config)
             if len(entries) == 1:
                 name, entry = entries[0]
@@ -50,8 +50,9 @@ class Application(services.SelectionService):
         pass
 
     def create(self):
-        global_config = self.plugin_config.pop('_global_config', {})
-        config = {self.SELECTOR: self.selector, self.name: self.plugin_config}
+        config = self.plugin_config.pop('_initial_config')
+        global_config = config.pop('_global_config', {})
+        config = {self.SELECTOR: self.selector, self.name: config}
 
         super(Application, self).load_plugins(self.name, config_from_dict(config), global_config, True)
 
