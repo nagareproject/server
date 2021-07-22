@@ -18,8 +18,8 @@ from nagare.admin import command
 class Serve(command.Command):
     DESC = 'launch an application'
 
-    def run(self, publisher_service, services_service):
+    def run(self, publisher_service, services_service, **params):
         random.seed()
 
         publisher = publisher_service.service
-        return services_service(publisher.serve)
+        return services_service(publisher.serve, **params)

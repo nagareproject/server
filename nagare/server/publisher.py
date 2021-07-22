@@ -59,10 +59,10 @@ class Publisher(plugin.Plugin):
 
         return None
 
-    def serve(self, services_service, reloader_service=None):
+    def serve(self, services_service, reloader_service=None, **params):
         status = services_service(self.monitor, lambda reloader, path: os._exit(3))
         if status == 0:
             app = services_service(self._create_app)
-            status = services_service(self._serve, app, **self.plugin_config)
+            status = services_service(self._serve, app, **dict(self.plugin_config, **params))
 
         return status
