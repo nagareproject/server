@@ -31,9 +31,10 @@ class Application(services.SelectionService):
         return 'Proxy to the <%s> application' % self.selector
 
     @staticmethod
-    def _walk(o, name, entry_points, config, get_children):
+    def _walk(o, name, entry_points, config, get_children, entries):
         if '_initial_config' in config:
-            entries = o.iter_entry_points(name, entry_points, config)
+            if entries is None:
+                entries = o.iter_entry_points(name, entry_points, config)
             if len(entries) == 1:
                 name, entry = entries[0]
 
@@ -42,7 +43,7 @@ class Application(services.SelectionService):
                     (entry, name, Application, None, [])
                 )
         else:
-            for e in services.SelectionService._walk(o, name, entry_points, config, get_children):
+            for e in services.SelectionService._walk(o, name, entry_points, config, get_children, None):
                 yield e
 
     @classmethod

@@ -32,7 +32,9 @@ setup(
     setup_requires=['setuptools_scm'],
     use_scm_version=True,
     install_requires=[
-        'nagare-services', 'nagare-commands-base',
+        'nagare-config',
+        'nagare-services',
+        'nagare-commands-base',
         'nagare-services-logging'
     ],
     entry_points='''
