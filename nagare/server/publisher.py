@@ -51,7 +51,7 @@ class Publisher(plugin.Plugin):
         return 'Serving application `{}`'.format(self.app_name)
 
     def handle_request(self, app, services_service, **params):
-        return services_service.handle_request(None, app=app, **params)
+        return services_service.handle_request([], app=app, **params)
     start_handle_request = handle_request
 
     def _serve(self, app, **params):

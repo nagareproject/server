@@ -22,7 +22,7 @@ class Services(services.Services):
 
     def __init__(self, *args, **kw):
         super(Services, self).__init__(*args, **kw)
-        self.request_handlers = [lambda chain, response, **params: response]
+        self.request_handlers = None
 
     @staticmethod
     def _has_handler(service, handle_name):
@@ -65,16 +65,17 @@ class Services(services.Services):
             self(service.handle_serve, app)
 
     def handle_start(self, app, services_service):
-        self.request_handlers += [service.handle_request for service in reversed(self.handlers('request'))]
-
         for service in self.handlers('start'):
             (services_service or self)(service.handle_start, app)
 
-    def create_request_handlers_chain(self):
-        return self.request_handlers
+    def create_request_handlers_chain(self, chain):
+        if self.request_handlers is None:
+            self.request_handlers = [service.handle_request for service in reversed(self.handlers('request'))]
 
-    def handle_request(self, _, **params):
-        return RequestHandlersChain(self.create_request_handlers_chain()).next(**params)
+        return chain + self.request_handlers
+
+    def handle_request(self, chain, **params):
+        return RequestHandlersChain(self.create_request_handlers_chain(chain)).next(**params)
 
     def handle_reload(self):
         for service in self.handlers('reload'):
