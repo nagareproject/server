@@ -125,7 +125,7 @@ class Config(command.Command):
 
                 return infos
 
-            config = extract_infos(services_service.walk2('services', services_service.ENTRY_POINTS))
+            config = extract_infos(services_service.walk2('services'))
             if not_modified:
                 config = self.compare(self.raw_config, config)
 

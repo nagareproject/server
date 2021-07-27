@@ -87,31 +87,29 @@ class Services(services.Services):
 
     # -----------------------------------------------------------------------------------------------------------------
 
-    def report(self, name, activated_columns=None, criterias=lambda *args: True, entry_points=None):
+    def report(self, name, activated_columns=None, criterias=lambda *args: True):
         super(Services, self).report(
             name,
             'Services',
-            activated_columns,
-            criterias,
-            entry_points
+            activated_columns, criterias
         )
+
         print('')
 
         super(Services, self).report(
             name,
             'Request handlers',
             activated_columns,
-            lambda *args: criterias(*args) and self._has_handler(args[-1], 'request'),
-            entry_points,
+            lambda *args: criterias(*args) and self._has_handler(args[-1], 'request')
         )
+
         print('')
 
         super(Services, self).report(
             name,
             'Start handlers',
             activated_columns,
-            lambda *args: criterias(*args) and self._has_handler(args[-1], 'start'),
-            entry_points,
+            lambda *args: criterias(*args) and self._has_handler(args[-1], 'start')
         )
 
         return 0

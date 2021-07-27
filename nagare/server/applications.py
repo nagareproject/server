@@ -30,22 +30,6 @@ class Application(services.SelectionService):
     def DESC(self):
         return 'Proxy to the <%s> application' % self.selector
 
-    @staticmethod
-    def _walk(o, name, entry_points, config, get_children, entries):
-        if '_initial_config' in config:
-            if entries is None:
-                entries = o.iter_entry_points(name, entry_points, config)
-            if len(entries) == 1:
-                name, entry = entries[0]
-
-                yield (
-                    lambda entry, name, cls, plugin, children: (name, cls.CONFIG_SPEC, children),
-                    (entry, name, Application, None, [])
-                )
-        else:
-            for e in services.SelectionService._walk(o, name, entry_points, config, get_children, None):
-                yield e
-
     @classmethod
     def load_plugins(self, name, config):
         pass

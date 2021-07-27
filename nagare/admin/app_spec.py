@@ -66,7 +66,13 @@ class Spec(command.Command):
 
             return infos
 
-        spec = extract_infos(services_service.walk1('services', 'nagare.services', self.config or {}))
+        services = services_service.walk1(
+            'services',
+            'nagare.services',
+            self.config or {},
+            services_service.activated_by_default
+        )
+        spec = extract_infos(services)
         if not spec:
             print('<empty>')
             return 1
