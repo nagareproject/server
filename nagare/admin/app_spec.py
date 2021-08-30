@@ -70,6 +70,7 @@ class Spec(command.Command):
             'services',
             'nagare.services',
             self.config or {},
+            {},
             services_service.activated_by_default
         )
         spec = extract_infos(services)
