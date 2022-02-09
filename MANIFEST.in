@@ -1,6 +1,1 @@
-exclude .gitignore
-exclude .gitlab-ci.yml
-exclude MANIFEST.in
-prune   tests
-
-include LICENSE.txt
+graft nagare/templates

@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2021 Net-ng.
+# Copyright (c) 2008-2022 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -24,7 +24,7 @@ class Application(services.SelectionService):
     LOAD_PRIORITY = 1100
 
     def __init__(self, name_, dist, name, services_service, **config):
-        services_service(super(Application, self).__init__, name_, dist, name, **config)
+        services_service(super(Application, self).__init__, name, dist, name, **config)
 
     @property
     def DESC(self):

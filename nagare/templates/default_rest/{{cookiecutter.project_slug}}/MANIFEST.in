@@ -1,0 +1,3 @@
+graft {{cookiecutter.project_slug}}/conf
+graft {{cookiecutter.project_slug}}/static
+graft {{cookiecutter.project_slug}}/data/locale
