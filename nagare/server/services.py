@@ -119,7 +119,7 @@ class SelectionService(plugin.SelectionPlugin):
 
     def __init__(self, name_, dist, type, services_service, **config):
         self.services = services_service
-        super(SelectionService, self).__init__(name_, dist, type, **config)
+        super(SelectionService, self).__init__(type, dist, type, **config)
 
     def _load_plugin(self, name_, dist, plugin_cls, **config):
         config = config.copy()
