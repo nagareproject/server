@@ -29,7 +29,28 @@ import sys
 import pkg_resources
 
 
-def load_entry_point(app, entry_point):
+def get_file(o):
+    module = getattr(o, '__module__', None)
+    if module is not None:
+        o = module
+
+    return getattr(o, '__file__', None)
+
+
+def load_distribution(dist, _=None):
+    """Load a distribution
+
+    In:
+      - ``dist`` -- name of the distribution
+
+    Return:
+      - the distribution
+    """
+    dist = pkg_resources.get_distribution(dist)
+    return dist, dist.location
+
+
+def load_entry_point(entry_point, entry):
     """Load an object registered under an entry point
 
     In:
@@ -40,9 +61,20 @@ def load_entry_point(app, entry_point):
       - (the object, the distribution of the object)
     """
     apps = {entry.name: entry for entry in pkg_resources.iter_entry_points(entry_point)}
-    entry_point = apps.get(app)
+    entry = apps.get(entry)
+    if entry is None:
+        return None, None
 
-    return (entry_point.load(), entry_point.dist) if entry_point else (None, None)
+    o = entry.load()
+    return o, get_file(o)
+
+
+def load_service(service, _=None):
+    return load_entry_point('nagare.services', service)
+
+
+def load_publisher(publisher, _=None):
+    return load_entry_point('nagare.publishers', publisher)
 
 
 def load_app(app, _=None):
@@ -55,29 +87,25 @@ def load_app(app, _=None):
     Return:
       - (the application, the distribution of the application)
     """
-    return load_entry_point(app, 'nagare.applications')
+    return load_entry_point('nagare.applications', app)
 
 
-def load_service(service, _=None):
-    return load_entry_point(service, 'nagare.services')
-
-
-def load_publisher(publisher, _=None):
-    return load_entry_point(publisher, 'nagare.publishers')
-
-
-def load_egg(dist, app):
-    """Load a registered application of a distribution
+def load_module(module, o=None):
+    """Load an object from a Python module
 
     In:
-      - ``dist`` -- name of the distribution
-      - ``app`` -- name of the application
+      - ``module`` -- name of the module
+      - ``app`` -- name of the object to load
 
     Return:
-      - (the application, the distribution of the application)
+      - (the object, None)
     """
-    dist = pkg_resources.get_distribution(dist)
-    return dist.get_entry_info('nagare.applications', app).load(), dist
+    r = __import__(module, fromlist=('',))
+
+    if o is not None:
+        r = getattr(r, o)
+
+    return r, get_file(r)
 
 
 def load_file(filename, app):
@@ -98,36 +126,46 @@ def load_file(filename, app):
     return load_module(name, app)
 
 
-def load_module(module, app):
-    """Load an object from a Python module
-
-    In:
-      - ``module`` -- name of the module
-      - ``app`` -- name of the object to load
-
-    Return:
-      - (the object, None)
-    """
-    r = __import__(module, fromlist=('',))
-
-    if app is not None:
-        r = getattr(r, app)
-
-    return r, None
-
-
 loaders = {
-    '': load_module,
-    'python': load_module,
-    'egg': load_egg,
-    'file': load_file,
-    'app': load_app,
+    'dist': load_distribution,
+    'entry-point': load_entry_point,
     'service': load_service,
-    'publisher': load_publisher
+    'publisher': load_publisher,
+    'app': load_app,
+    'python': load_module,
+    'file': load_file,
 }
 
 
-def load_object(reference):
+def parse_reference(reference, default_scheme=''):
+    """Parse a reference
+
+    In:
+      - ``reference`` -- reference as a string
+
+    Return:
+      - a tuple (scheme, reference, object loaded, distribution where this object is located or ``None``)
+    """
+    reference = reference.strip()
+
+    if ' ' in reference:
+        scheme, reference = reference.split(maxsplit=1)
+    else:
+        scheme = default_scheme
+
+    if ':' in reference:
+        reference, o = reference.split(':', 1)
+    else:
+        o = None
+
+    return scheme, reference, o
+
+
+def is_reference(reference, default_scheme=''):
+    return parse_reference(reference, default_scheme)[0] in loaders
+
+
+def load_object(reference, default_scheme='python'):
     """Load an object from a reference
 
     In:
@@ -136,14 +174,5 @@ def load_object(reference):
     Return:
       - a tuple (object loaded, distribution where this object is located or ``None``)
     """
-    if ' ' in reference:
-        scheme, reference = reference.split(' ', 1)
-    else:
-        scheme = ''
-
-    if ':' in reference:
-        reference, o = reference.split(':', 1)
-    else:
-        o = None
-
+    scheme, reference, o = parse_reference(reference, default_scheme)
     return loaders[scheme](reference, o)
