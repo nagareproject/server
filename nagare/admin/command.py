@@ -51,8 +51,7 @@ def get_roots(config, global_config):
             if self.app_name:
                 application_ori['name'] = self.app_name
 
-                app_url = application.get('url', '').strip('/')
-                self.app_url = app_url and ('/' + app_url)
+                self.app_url = '/' + application.get('url', '').strip('/')
                 self.data = application.get('data')
                 self.static = application.get('static')
 
