@@ -82,7 +82,10 @@ class Spec(command.Command):
         print('---------------------------')
 
         spec = config_from_dict(spec)
-        spec.display(4, filter_parameter=lambda param: (param == '___many___') or (not param.startswith('_')))
+        spec.display(
+            4,
+            filter_parameter=lambda param: (param in ('__many__', '___many___')) or (not param.startswith('_'))
+        )
 
         return 0
 
