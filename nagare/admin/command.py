@@ -68,7 +68,10 @@ def get_roots(config, global_config):
                         module_name = package_module[1]
                         paths = list(__import__(package_module[0], fromlist=['']).__path__)
 
-                    module_path = imp.find_module(module_name, paths)[1]
+                    module_file, module_path, _ = imp.find_module(module_name, paths)
+                    if module_file:
+                        module_file.close()
+
                     self.module_path = os.path.dirname(module_path)
                     self.package_path = os.path.join(entry.dist.location, self.app_name)
 
