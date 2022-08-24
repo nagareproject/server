@@ -133,9 +133,6 @@ class Config(command.Command):
             print('<empty>')
             return 1
 
-        print('Configuration')
-        print('-------------')
-
         config_from_dict(config).display(
             4,
             filter_parameter=lambda param: (param == '___many___') or (not param.startswith('_'))

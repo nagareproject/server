@@ -25,8 +25,17 @@ The possible reference syntaxes are:
 
 import os
 import sys
+import warnings
 
 import pkg_resources
+
+warnings.filterwarnings('ignore', module='_distutils')
+try:
+    from pip._internal.metadata.pkg_resources import Distribution  # noqa: E402
+except ImportError:
+    def Distribution(dist):
+        dist.editable_project_location = None
+        return dist
 
 
 def get_file(o):
@@ -47,7 +56,7 @@ def load_distribution(dist, _=None):
       - the distribution
     """
     dist = pkg_resources.get_distribution(dist)
-    return dist, dist.location
+    return dist, Distribution(dist).editable_project_location or dist.location
 
 
 def load_entry_point(entry_point, entry):

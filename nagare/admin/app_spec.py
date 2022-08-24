@@ -78,9 +78,6 @@ class Spec(command.Command):
             print('<empty>')
             return 1
 
-        print('Configuration specification')
-        print('---------------------------')
-
         spec = config_from_dict(spec)
         spec.display(
             4,

@@ -12,12 +12,21 @@
 
 import os
 import imp
+import warnings
 
 from nagare.admin import admin
 from nagare.admin.admin import Banner  # noqa: F401
 from nagare.admin.admin import Commands
 from nagare.config import InterpolationError
 from nagare.server.services import Services, NagareServices
+
+warnings.filterwarnings('ignore', module='_distutils')
+try:
+    from pip._internal.metadata.pkg_resources import Distribution  # noqa: E402
+except ImportError:
+    def Distribution(dist):
+        dist.editable_project_location = None
+        return dist
 
 
 class AppCommands(Commands):
@@ -73,7 +82,10 @@ def get_roots(config, global_config):
                         module_file.close()
 
                     self.module_path = os.path.dirname(module_path)
-                    self.package_path = os.path.join(entry.dist.location, self.app_name)
+                    self.package_path = os.path.join(
+                        Distribution(entry.dist).editable_project_location or entry.dist.location,
+                        self.app_name
+                    )
 
             application.from_dict(application_ori)
 
