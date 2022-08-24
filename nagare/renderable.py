@@ -35,6 +35,9 @@ class Renderable(xml.Renderable):
         """
         return presentation.render(self.o, renderer, self, self.view, view, *args, **kw)
 
+    def render_super(self, renderer, view=presentation.CURRENT_VIEW, *args, **kw):
+        return presentation.render(super(self.o.__class__, self.o), renderer, self, self.view, view, *args, **kw)
+
     def __bool__(self):
         return bool(self.o)
     __nonzero__ = __bool__
