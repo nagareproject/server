@@ -12,21 +12,13 @@
 
 import os
 import imp
-import warnings
 
 from nagare.admin import admin
 from nagare.admin.admin import Banner  # noqa: F401
 from nagare.admin.admin import Commands
+from nagare.packaging import Distribution
 from nagare.config import InterpolationError
 from nagare.server.services import Services, NagareServices
-
-warnings.filterwarnings('ignore', module='_distutils')
-try:
-    from pip._internal.metadata.pkg_resources import Distribution  # noqa: E402
-except ImportError:
-    def Distribution(dist):
-        dist.editable_project_location = None
-        return dist
 
 
 class AppCommands(Commands):
