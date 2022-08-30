@@ -14,7 +14,9 @@ from nagare.services import plugin
 from nagare.server import reference
 
 
-def default_exception_handler(exception, exceptions_service, **context):
+def default_exception_handler(exception, exceptions_service, services_service, **context):
+    exception = services_service(exceptions_service.handle_exception, exception, **context)
+
     exceptions_service.log_exception()
 
     if getattr(exception, 'commit_transaction', False):
@@ -38,18 +40,29 @@ class ExceptionsService(plugin.Plugin):
             **config
         )
 
-        self.services = services_service
         self.exception_handler = reference.load_object(exception_handler)[0]
+        self.services = services_service
+        self.exception_handlers = []
 
     @staticmethod
     def log_exception(logger_name='nagare.services.exceptions', exc_info=True):
         log.get_logger(logger_name).error('Unhandled exception', exc_info=exc_info)
 
-    def handle_exception(self, exception, params):
-        return self.services(self.exception_handler, exception, **params)
+    def clear_exception_handlers(self):
+        self.exception_handlers = []
+
+    def add_exception_handler(self, exception_handler):
+        if exception_handler not in self.exception_handlers:
+            self.exception_handlers.append(exception_handler)
+
+    def handle_exception(self, exception, services_service, **context):
+        for exception_handler in self.exception_handlers:
+            exception = services_service(exception_handler, exception, **context)
+
+        return exception
 
     def handle_request(self, chain, **params):
         try:
             return chain.next(**params)
         except Exception as exception:
-            return self.handle_exception(exception, params)
+            return self.services(self.exception_handler, exception, **params)
