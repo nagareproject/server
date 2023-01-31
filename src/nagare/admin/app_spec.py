@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,8 +7,8 @@
 # this distribution.
 # --
 
-from itertools import starmap
 from fnmatch import fnmatchcase
+from itertools import starmap
 
 from nagare.admin import command
 from nagare.config import config_from_dict
@@ -23,8 +23,11 @@ class Spec(command.Command):
 
     def set_arguments(self, parser):
         parser.add_argument(
-            '-n', '--name', action='append', dest='names',
-            help='name of the service to display (can be specified multiple times and wildchars are allowed)'
+            '-n',
+            '--name',
+            action='append',
+            dest='names',
+            help='name of the service to display (can be specified multiple times and wildchars are allowed)',
         )
 
         super(Spec, self).set_arguments(parser)
@@ -67,11 +70,7 @@ class Spec(command.Command):
             return infos
 
         services = services_service.walk1(
-            'services',
-            'nagare.services',
-            self.config or {},
-            {},
-            services_service.activated_by_default
+            'services', 'nagare.services', self.config or {}, {}, services_service.activated_by_default
         )
         spec = extract_infos(services)
         if not spec:
@@ -80,8 +79,7 @@ class Spec(command.Command):
 
         spec = config_from_dict(spec)
         spec.display(
-            4,
-            filter_parameter=lambda param: (param in ('__many__', '___many___')) or (not param.startswith('_'))
+            4, filter_parameter=lambda param: (param in ('__many__', '___many___')) or (not param.startswith('_'))
         )
 
         return 0

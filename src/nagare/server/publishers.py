@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -14,7 +14,7 @@ class Publishers(services.SelectionService):
     ENTRY_POINTS = 'nagare.publishers'
     CONFIG_SPEC = dict(
         services.SelectionService.CONFIG_SPEC,
-        type='string(default=None, help="name of the publisher entry-point, registered under [nagare.publishers]")'
+        type='string(default=None, help="name of the publisher entry-point, registered under [nagare.publishers]")',
     )
     LOAD_PRIORITY = 20
 

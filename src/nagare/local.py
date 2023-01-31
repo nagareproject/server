@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,7 +7,7 @@
 # this distribution.
 # --
 
-"""Scoped objects
+"""Scoped objects.
 
 Currently:
 
@@ -21,8 +21,8 @@ from nagare.services import plugin
 
 
 class Thread(threading.local):
-    """Objects with attributes scoped to the current thread
-    """
+    """Objects with attributes scoped to the current thread."""
+
     def clear(self):
         self.__dict__.clear()
 
@@ -36,14 +36,15 @@ class DummyLock(object):
 
 
 class Process(object):
-    """Objects with attributes scoped to the process
-    """
+    """Objects with attributes scoped to the process."""
+
     def clear(self):
         self.__dict__.clear()
 
     @staticmethod
     def create_lock():
         return DummyLock()
+
 
 # ----------------------------------------------------------------------------
 
@@ -80,6 +81,7 @@ class Local(plugin.Plugin):
         request.clear()
 
         return chain.next(**kw)
+
 
 # ----------------------------------------------------------------------------
 

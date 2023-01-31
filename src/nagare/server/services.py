@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -9,28 +9,22 @@
 
 from functools import reduce
 
-from nagare.services import services, plugin
+from nagare.services import plugin, services
 
 
 class RequestHandlersChain(list):
-
     def next(self, **params):
         return self.pop()(self, **params)
 
 
 class Services(services.Services):
-
     def __init__(self, *args, **kw):
         super(Services, self).__init__(*args, **kw)
         self.request_handlers = None
 
     @staticmethod
     def _has_handler(service, handle_name):
-        return getattr(
-            service,
-            'has_{}_handler'.format(handle_name),
-            hasattr(service, 'handle_{}'.format(handle_name))
-        )
+        return getattr(service, 'has_{}_handler'.format(handle_name), hasattr(service, 'handle_{}'.format(handle_name)))
 
     def handlers(self, handle_name):
         return [service for service in self.values() if self._has_handler(service, handle_name)]
@@ -88,11 +82,7 @@ class Services(services.Services):
     # -----------------------------------------------------------------------------------------------------------------
 
     def report(self, name, activated_columns=None, criterias=lambda *args: True):
-        super(Services, self).report(
-            name,
-            'Services',
-            activated_columns, criterias
-        )
+        super(Services, self).report(name, 'Services', activated_columns, criterias)
 
         print('')
 
@@ -100,7 +90,7 @@ class Services(services.Services):
             name,
             'Request handlers',
             activated_columns,
-            lambda *args: criterias(*args) and self._has_handler(args[-1], 'request')
+            lambda *args: criterias(*args) and self._has_handler(args[-1], 'request'),
         )
 
         print('')
@@ -109,14 +99,13 @@ class Services(services.Services):
             name,
             'Start handlers',
             activated_columns,
-            lambda *args: criterias(*args) and self._has_handler(args[-1], 'start')
+            lambda *args: criterias(*args) and self._has_handler(args[-1], 'start'),
         )
 
         return 0
 
 
 class SelectionService(plugin.SelectionPlugin):
-
     def __init__(self, name_, dist, type, services_service, **config):
         self.services = services_service
         super(SelectionService, self).__init__(type, dist, type, **config)

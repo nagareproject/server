@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,8 +7,7 @@
 # this distribution.
 # --
 
-"""The ``serve`` administrative command
-"""
+"""The ``serve`` administrative command."""
 
 import random
 

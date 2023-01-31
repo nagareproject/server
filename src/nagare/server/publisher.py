@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -52,6 +52,7 @@ class Publisher(plugin.Plugin):
 
     def handle_request(self, app, services_service, **params):
         return services_service.handle_request([], app=app, **params)
+
     start_handle_request = handle_request
 
     def _serve(self, app, **params):

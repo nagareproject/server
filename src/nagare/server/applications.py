@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -18,7 +18,7 @@ class Application(services.SelectionService):
     SELECTOR = 'name'
     CONFIG_SPEC = dict(
         services.SelectionService.CONFIG_SPEC,
-        name='string(default=None, help="name of the application entry-point, registered under [nagare.applications]")'
+        name='string(default=None, help="name of the application entry-point, registered under [nagare.applications]")',
     )
     del CONFIG_SPEC['type']
     LOAD_PRIORITY = 1100
@@ -39,13 +39,11 @@ class Application(services.SelectionService):
 
                 yield (
                     lambda entry, name, cls, plugin, children: (name, cls.CONFIG_SPEC, children),
-                    (entry, name, Application, None, [])
+                    (entry, name, Application, None, []),
                 )
         else:
             for e in services.SelectionService._walk(
-                    o, name, entry_points,
-                    config, global_config, activated_by_default,
-                    get_children
+                o, name, entry_points, config, global_config, activated_by_default, get_children
             ):
                 yield e
 

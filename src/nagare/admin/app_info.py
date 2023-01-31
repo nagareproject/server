@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,8 +7,8 @@
 # this distribution.
 # --
 
-from itertools import starmap
 from fnmatch import fnmatchcase
+from itertools import starmap
 
 from nagare.admin import command
 
@@ -19,40 +19,25 @@ class Info(command.Command):
     def set_arguments(self, parser):
         super(Info, self).set_arguments(parser)
 
-        parser.add_argument(
-            '--on', action='store_true',
-            help='only list the activated services'
-        )
+        parser.add_argument('--on', action='store_true', help='only list the activated services')
+
+        parser.add_argument('--off', action='store_false', help='only list the deactivated services')
 
         parser.add_argument(
-            '--off', action='store_false',
-            help='only list the deactivated services'
+            '-n',
+            '--name',
+            action='append',
+            dest='names',
+            help='name of the service to display (can be specified multiple times and wildchars are allowed)',
         )
 
-        parser.add_argument(
-            '-n', '--name', action='append', dest='names',
-            help='name of the service to display (can be specified multiple times and wildchars are allowed)'
-        )
+        parser.add_argument('-v', '--version', action='store_true', help='display the Python package versions')
 
-        parser.add_argument(
-            '-v', '--version', action='store_true',
-            help='display the Python package versions'
-        )
+        parser.add_argument('-l', '--location', action='store_true', help='display the Python package locations')
 
-        parser.add_argument(
-            '-l', '--location', action='store_true',
-            help='display the Python package locations'
-        )
+        parser.add_argument('-m', '--module', action='store_true', help='display the Python modules')
 
-        parser.add_argument(
-            '-m', '--module', action='store_true',
-            help='display the Python modules'
-        )
-
-        parser.add_argument(
-            '-d', '--description', action='store_true',
-            help='display the plugin description'
-        )
+        parser.add_argument('-d', '--description', action='store_true', help='display the plugin description')
 
     @staticmethod
     def match_service(on, off, names, name, activated):
@@ -82,7 +67,7 @@ class Info(command.Command):
         services_service.report(
             'services',
             activated_columns,
-            lambda entry, fullname, name, plugin_cls, plugin: cls.match_service(on, off, names, fullname, plugin)
+            lambda entry, fullname, name, plugin_cls, plugin: cls.match_service(on, off, names, fullname, plugin),
         )
 
         return 0

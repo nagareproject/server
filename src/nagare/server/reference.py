@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,7 +7,7 @@
 # this distribution.
 # --
 
-"""Import an object from a string reference
+"""Import an object from a string reference.
 
 The possible reference syntaxes are:
 
@@ -26,8 +26,8 @@ The possible reference syntaxes are:
 import os
 import sys
 
-import pkg_resources
 from nagare.packaging import Distribution
+import pkg_resources
 
 
 def get_file(o):
@@ -39,7 +39,7 @@ def get_file(o):
 
 
 def load_distribution(dist, _=None):
-    """Load a distribution
+    """Load a distribution.
 
     In:
       - ``dist`` -- name of the distribution
@@ -52,7 +52,7 @@ def load_distribution(dist, _=None):
 
 
 def load_entry_point(entry_point, entry):
-    """Load an object registered under an entry point
+    """Load an object registered under an entry point.
 
     In:
       - ``app`` -- name of the object
@@ -79,7 +79,7 @@ def load_publisher(publisher, _=None):
 
 
 def load_app(app, _=None):
-    """Load a registered application
+    """Load a registered application.
 
     In:
       - ``app`` -- name of the application
@@ -92,7 +92,7 @@ def load_app(app, _=None):
 
 
 def load_module(module, o=None):
-    """Load an object from a Python module
+    """Load an object from a Python module.
 
     In:
       - ``module`` -- name of the module
@@ -110,7 +110,7 @@ def load_module(module, o=None):
 
 
 def load_file(filename, app):
-    """Load an object from a file
+    """Load an object from a file.
 
     In:
       - ``filename`` -- name of the file
@@ -139,7 +139,7 @@ loaders = {
 
 
 def parse_reference(reference, default_scheme=''):
-    """Parse a reference
+    """Parse a reference.
 
     In:
       - ``reference`` -- reference as a string
@@ -167,7 +167,7 @@ def is_reference(reference, default_scheme=''):
 
 
 def load_object(reference, default_scheme='python'):
-    """Load an object from a reference
+    """Load an object from a reference.
 
     In:
       - ``reference`` -- reference as a string

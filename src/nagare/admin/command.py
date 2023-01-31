@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,18 +7,16 @@
 # this distribution.
 # --
 
-"""The ``nagare-admin`` executable
-"""
+"""The ``nagare-admin`` executable."""
 
-import os
 import imp
+import os
 
 from nagare.admin import admin
-from nagare.admin.admin import Banner  # noqa: F401
-from nagare.admin.admin import Commands
-from nagare.packaging import Distribution
+from nagare.admin.admin import Banner, Commands  # noqa: F401
 from nagare.config import InterpolationError
-from nagare.server.services import Services, NagareServices
+from nagare.packaging import Distribution
+from nagare.server.services import NagareServices, Services
 
 
 class AppCommands(Commands):
@@ -26,9 +24,7 @@ class AppCommands(Commands):
 
 
 def get_roots(config, global_config):
-
     class Application(Services):
-
         def __init__(self):
             self.app_name = self.app_version = self.app_url = self.data = self.static = None
             self.package_path = self.module_path = None
@@ -75,8 +71,7 @@ def get_roots(config, global_config):
 
                     self.module_path = os.path.dirname(module_path)
                     self.package_path = os.path.join(
-                        Distribution(entry.dist).editable_project_location or entry.dist.location,
-                        self.app_name
+                        Distribution(entry.dist).editable_project_location or entry.dist.location, self.app_name
                     )
 
             application.from_dict(application_ori)
@@ -85,14 +80,18 @@ def get_roots(config, global_config):
     if config is not None:
         application.load_plugins(config, global_config)
 
-    return application.app_name, application.app_version, application.app_url, application.data, application.static, (
-        application.package_path,
-        application.module_path
+    return (
+        application.app_name,
+        application.app_version,
+        application.app_url,
+        application.data,
+        application.static,
+        (application.package_path, application.module_path),
     )
 
 
 class Command(admin.Command):
-    """The base class of all the commands"""
+    """The base class of all the commands."""
 
     SERVICES_FACTORY = NagareServices
 
@@ -107,13 +106,15 @@ class Command(admin.Command):
         data_path = data or admin.find_path(roots, 'data')
         static_path = static or admin.find_path(roots, 'static')
 
-        global_config.update({
-            'app_name': app_name,
-            'app_version': app_version,
-            'app_url': app_url,
-            'data': data_path,
-            'static': static_path,
-            '_static_path': static_path
-        })
+        global_config.update(
+            {
+                'app_name': app_name,
+                'app_version': app_version,
+                'app_url': app_url,
+                'data': data_path,
+                'static': static_path,
+                '_static_path': static_path,
+            }
+        )
 
         return super(Command, cls)._create_services(config, config_filename, roots, global_config, create_application)

@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -23,11 +23,8 @@ def _render(o, renderer, comp, view_name, *args, **kw):
         raise ViewError(msg + ' for ' + repr(o))
 
     rendering = view(renderer, comp, view_name, *args, **kw)
-    if rendering is None:
-        msg = ('View "%s"' % view_name) if view_name else 'Default view'
-        raise ViewError(msg + ' for ' + repr(o) + ' returns nothing')
 
-    return rendering
+    return rendering if rendering is not None else renderer.root
 
 
 def render(o, renderer, comp=None, view=None, view_name=CURRENT_VIEW, *args, **kw):
@@ -36,11 +33,7 @@ def render(o, renderer, comp=None, view=None, view_name=CURRENT_VIEW, *args, **k
     renderer.start_rendering(view_name, args, kw)
 
     rendering = _render(
-        o,
-        renderer,
-        comp,
-        view if (view_name == CURRENT_VIEW) or (view_name == 0) else view_name,
-        *args, **kw
+        o, renderer, comp, view if (view_name == CURRENT_VIEW) or (view_name == 0) else view_name, *args, **kw
     )
 
     return renderer.end_rendering(rendering)

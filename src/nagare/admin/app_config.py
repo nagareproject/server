@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -7,8 +7,8 @@
 # this distribution.
 # --
 
-from itertools import starmap
 from fnmatch import fnmatchcase
+from itertools import starmap
 
 from nagare.admin import command
 from nagare.config import config_from_dict
@@ -23,19 +23,20 @@ class Config(command.Command):
 
     def set_arguments(self, parser):
         parser.add_argument(
-            '-n', '--name', action='append', dest='names',
-            help='name of the service to display (can be specified multiple times and wildchars are allowed)'
+            '-n',
+            '--name',
+            action='append',
+            dest='names',
+            help='name of the service to display (can be specified multiple times and wildchars are allowed)',
         )
 
         parser.add_argument(
-            '--not-modified', action='store_true',
-            help='display the not modified configuration parameters (parameters with default value)'
+            '--not-modified',
+            action='store_true',
+            help='display the not modified configuration parameters (parameters with default value)',
         )
 
-        parser.add_argument(
-            '--modified', action='store_true',
-            help='display the modified configuration parameters'
-        )
+        parser.add_argument('--modified', action='store_true', help='display the modified configuration parameters')
 
         super(Config, self).set_arguments(parser)
 
@@ -104,7 +105,7 @@ class Config(command.Command):
                         continue
 
                     children = list(children)
-                    children_names = set(child[1][1] for child in children)
+                    children_names = {child[1][1] for child in children}
                     fullname = ancestors + (name,)
 
                     if (plugin is not None) and self.match_service(names, fullname):
@@ -134,8 +135,7 @@ class Config(command.Command):
             return 1
 
         config_from_dict(config).display(
-            4,
-            filter_parameter=lambda param: (param == '___many___') or (not param.startswith('_'))
+            4, filter_parameter=lambda param: (param == '___many___') or (not param.startswith('_'))
         )
 
         return 0

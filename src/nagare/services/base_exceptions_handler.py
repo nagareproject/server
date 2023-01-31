@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -10,8 +10,8 @@
 # --
 
 from nagare import log
-from nagare.services import plugin
 from nagare.server import reference
+from nagare.services import plugin
 
 
 def default_exception_handler(exception, exceptions_service, services_service, **context):
@@ -29,15 +29,12 @@ class ExceptionsService(plugin.Plugin):
     LOAD_PRIORITY = 25
     CONFIG_SPEC = dict(
         plugin.Plugin.CONFIG_SPEC,
-        exception_handler='string(default="nagare.services.base_exceptions_handler:default_exception_handler")'
+        exception_handler='string(default="nagare.services.base_exceptions_handler:default_exception_handler")',
     )
 
     def __init__(self, name, dist, exception_handler, services_service, **config):
         services_service(
-            super(ExceptionsService, self).__init__,
-            name, dist,
-            exception_handle=exception_handler,
-            **config
+            super(ExceptionsService, self).__init__, name, dist, exception_handle=exception_handler, **config
         )
 
         self.exception_handler = reference.load_object(exception_handler)[0]

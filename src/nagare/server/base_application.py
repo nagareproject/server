@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -22,18 +22,13 @@ class App(plugin.Plugin):
         _root='string(default="$root")',
         _data='string(default="$data")',
         _config_filename='string(default="$config_filename")',
-        _user_config_filename='string(default="$user_config_filename")'
+        _user_config_filename='string(default="$user_config_filename")',
     )
 
     def __init__(
-        self,
-        name, dist,
-        _root, _data,
-        _config_filename, _user_config_filename,
-        reloader_service=None, **config
+        self, name, dist, _root, _data, _config_filename, _user_config_filename, reloader_service=None, **config
     ):
-        """Initialization
-        """
+        """Initialization."""
         super(App, self).__init__(name, dist, **config)
 
         self.version = dist and dist.version

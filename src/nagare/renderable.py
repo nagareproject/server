@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2022 Net-ng.
+# Copyright (c) 2008-2023 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -12,9 +12,8 @@ from nagare.renderers import xml
 
 
 class Renderable(xml.Renderable):
-
     def __init__(self, o=None, view=presentation.ANON_VIEW):
-        """Initialisation
+        """Initialisation.
 
         In:
           - ``o`` -- the python object (or renderable) to transform into a renderable
@@ -24,12 +23,11 @@ class Renderable(xml.Renderable):
         self.view = view
 
     def __call__(self):
-        """Return the inner object
-        """
+        """Return the inner object."""
         return self.o
 
     def render(self, renderer, view=presentation.CURRENT_VIEW, *args, **kw):
-        """Rendering method of a renderable object
+        """Rendering method of a renderable object.
 
         Forward to the ``presentation`` service
         """
@@ -40,6 +38,7 @@ class Renderable(xml.Renderable):
 
     def __bool__(self):
         return bool(self.o)
+
     __nonzero__ = __bool__
 
     def __repr__(self):
@@ -47,5 +46,5 @@ class Renderable(xml.Renderable):
             self.__class__.__name__.lower(),
             "view '%s'" % self.view if self.view else 'default view',
             id(self),
-            self.o
+            self.o,
         )
