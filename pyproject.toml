@@ -24,7 +24,7 @@ license = {file = 'LICENSE.txt'}
 requires-python = '>=3.7'
 dependencies = [
     'nagare-config',
-    'nagare-services',
+    'nagare-services>=2.2.1.dev',
     'nagare-commands-base',
     'nagare-services-logging'
 ]
