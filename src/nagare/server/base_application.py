@@ -10,6 +10,7 @@
 # --
 
 import os
+import pathlib
 import sys
 
 from nagare.services import plugin
@@ -38,13 +39,25 @@ class App(plugin.Plugin):
         if reloader_service is not None:
             for module in list(sys.modules.values()):
                 filename = getattr(module, '__file__', None)
-                if filename and ('lib/python' not in filename.lower()):
+                if (
+                    filename
+                    and not self._is_relative_to(filename, sys.base_prefix)
+                    and not self._is_relative_to(filename, sys.exec_prefix)
+                ):
                     filename = os.path.abspath(filename)
                     reloader_service.watch_file(filename[:-1] if filename.endswith(('.pyc', '.pyo')) else filename)
 
             reloader_service.watch_file(_config_filename)
             if os.path.isfile(_user_config_filename):
                 reloader_service.watch_file(_user_config_filename)
+
+    @staticmethod
+    def _is_relative_to(path, root):
+        try:
+            pathlib.PurePath(path).relative_to(root)
+            return True
+        except ValueError:
+            return False
 
     def handle_start(self, app):
         pass
