@@ -38,7 +38,7 @@ def get_file(o):
     return getattr(o, '__file__', None)
 
 
-def load_distribution(dist, _=None):
+def load_distribution(dist, path=None):
     """Load a distribution.
 
     In:
@@ -48,7 +48,11 @@ def load_distribution(dist, _=None):
       - the distribution
     """
     dist = pkg_resources.get_distribution(dist)
-    return dist, Distribution(dist).editable_project_location or dist.location
+    location = Distribution(dist).editable_project_location or dist.location
+    if path:
+        location = os.path.join(location, *path.split('/'))
+
+    return dist, location
 
 
 def load_entry_point(entry_point, entry):
