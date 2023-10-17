@@ -41,7 +41,6 @@ dev = [
     'sphinx',
     'sphinx_rtd_theme',
     'pre-commit',
-    'black',
     'ruff',
     'pytest',
     'build',
@@ -78,6 +77,9 @@ convention = 'google'
 [tool.ruff.isort]
 known-third-party = ['nagare']
 force-sort-within-sections = true
+
+[tool.ruff.format]
+quote-style = 'single'
 
 [tool.pytest.ini_options]
 testpaths = ['tests']

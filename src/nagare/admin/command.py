@@ -32,7 +32,7 @@ def get_roots(config, global_config):
             super(Application, self).__init__()
 
         def load_plugins(self, config, global_config):
-            # Ignore all substituion errors
+            # Ignore all substitution errors
             class D(dict):
                 def get(self, name):
                     return super(D, self).get(name, '')
