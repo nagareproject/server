@@ -23,17 +23,17 @@ The possible reference syntaxes are:
     (for example: ``'app examples'``)
 """
 
+from importlib import metadata
 import os
 import sys
 
 from nagare.packaging import Distribution
-import pkg_resources
 
 
 def get_file(o):
     module = getattr(o, '__module__', None)
     if module is not None:
-        o = module
+        o = sys.modules[module]
 
     return getattr(o, '__file__', None)
 
@@ -47,7 +47,7 @@ def load_distribution(dist, path=None):
     Return:
       - the distribution
     """
-    dist = pkg_resources.get_distribution(dist)
+    dist = metadata.distribution(dist)
     location = Distribution(dist).editable_project_location or dist.location
     if path:
         location = os.path.join(location, *path.split('/'))
@@ -65,8 +65,13 @@ def load_entry_point(entry_point, entry):
     Return:
       - (the object, the distribution of the object)
     """
-    apps = {entry.name: entry for entry in pkg_resources.iter_entry_points(entry_point)}
-    entry = apps.get(entry)
+    all_entry_points = metadata.entry_points()
+    entry_points = (
+        all_entry_points.get(entry_point, ())
+        if isinstance(all_entry_points, dict)
+        else all_entry_points.select(group=entry_point)
+    )
+    entry = {entry.name: entry for entry in entry_points}.get(entry)
     if entry is None:
         return None, None
 
@@ -108,7 +113,7 @@ def load_module(module, o=None):
     r = __import__(module, fromlist=('',))
 
     if o is not None:
-        r = getattr(r, o)
+        r = getattr(r, o, None)
 
     return r, get_file(r)
 
@@ -128,7 +133,10 @@ def load_file(filename, app):
         sys.path.insert(0, dirname)
 
     name = os.path.splitext(os.path.basename(filename))[0]
-    return load_module(name, app)
+    try:
+        return load_module(name, app)
+    except (ImportError, ModuleNotFoundError):
+        return None, None
 
 
 loaders = {

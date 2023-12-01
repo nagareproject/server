@@ -9,7 +9,7 @@
 
 """The ``nagare-admin`` executable."""
 
-import imp
+from importlib.util import find_spec
 import os
 
 from nagare.admin import admin
@@ -52,27 +52,20 @@ def get_roots(config, global_config):
                 self.data = application.get('data')
                 self.static = application.get('static')
 
-                entries = dict(super(Application, self).iter_entry_points('application', 'nagare.applications', config))
-                entry = entries.get(self.app_name)
-                if entry is not None:
-                    self.app_version = entry.dist.version
-
-                    package_module = entry.module_name.rsplit('.', 1)
-                    if len(package_module) == 1:
-                        module_name = package_module[0]
-                        paths = None
-                    else:
-                        module_name = package_module[1]
-                        paths = list(__import__(package_module[0], fromlist=['']).__path__)
-
-                    module_file, module_path, _ = imp.find_module(module_name, paths)
-                    if module_file:
-                        module_file.close()
-
-                    self.module_path = os.path.dirname(module_path)
-                    self.package_path = os.path.join(
-                        Distribution(entry.dist).editable_project_location or entry.dist.location, self.app_name
+                entries = {
+                    name: (dist, entry)
+                    for dist, name, entry in super(Application, self).iter_entry_points(
+                        'application', 'nagare.applications', config
                     )
+                }
+
+                if self.app_name in entries:
+                    dist, entry = entries[self.app_name]
+                    self.app_version = dist.version
+
+                    module_spec = find_spec(entry.value.split('.', 1)[0])
+                    self.module_path = module_spec.submodule_search_locations[0]
+                    self.package_path = Distribution(entry.dist).editable_project_location or entry.dist.location
 
             application.from_dict(application_ori)
 
@@ -86,7 +79,7 @@ def get_roots(config, global_config):
         application.app_url,
         application.data,
         application.static,
-        (application.package_path, application.module_path),
+        (application.module_path, application.package_path),
     )
 
 

@@ -35,7 +35,7 @@ class Application(services.SelectionService):
         if '_initial_config' in config:
             entries = o.iter_entry_points(name, entry_points, config)
             if len(entries) == 1:
-                name, entry = entries[0]
+                dist, name, entry = entries[0]
 
                 yield (
                     lambda entry, name, cls, plugin, children: (name, cls.CONFIG_SPEC, children),
