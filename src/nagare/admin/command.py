@@ -65,7 +65,7 @@ def get_roots(config, global_config):
 
                     module_spec = find_spec(entry.value.split('.', 1)[0])
                     self.module_path = module_spec.submodule_search_locations[0]
-                    self.package_path = Distribution(entry.dist).editable_project_location or entry.dist.location
+                    self.package_path = Distribution(dist).editable_project_location or str(dist.locate_file(''))
 
             application.from_dict(application_ori)
 
