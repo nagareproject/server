@@ -9,14 +9,14 @@
 
 """The ``nagare-admin`` executable."""
 
-from importlib.util import find_spec
 import os
+from importlib.util import find_spec
 
 from nagare.admin import admin
-from nagare.admin.admin import Banner, Commands  # noqa: F401
 from nagare.config import InterpolationError
 from nagare.packaging import Distribution
-from nagare.server.services import NagareServices, Services
+from nagare.admin.admin import Banner, Commands  # noqa: F401
+from nagare.server.services import Services, NagareServices
 
 
 class AppCommands(Commands):
@@ -63,8 +63,12 @@ def get_roots(config, global_config):
                     dist, entry = entries[self.app_name]
                     self.app_version = dist.version
 
-                    module_spec = find_spec(entry.value.split('.', 1)[0])
-                    self.module_path = module_spec.submodule_search_locations[0]
+                    parent_module_name = entry.value.split(':', 1)[0].rsplit('.', 1)[0]
+                    parent_module_spec = find_spec(parent_module_name)
+                    if parent_module_spec is None:
+                        raise ModuleNotFoundError("No module named '{}'".format(parent_module_name))
+
+                    self.module_path = os.path.dirname(parent_module_spec.origin)
                     self.package_path = Distribution(dist).editable_project_location or str(dist.locate_file(''))
 
             application.from_dict(application_ori)
