@@ -23,9 +23,9 @@ The possible reference syntaxes are:
     (for example: ``'app examples'``)
 """
 
-from importlib import metadata
 import os
 import sys
+from importlib import metadata
 
 from nagare.packaging import Distribution
 

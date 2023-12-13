@@ -10,8 +10,8 @@
 # --
 
 import os
-import pathlib
 import sys
+import pathlib
 
 from nagare.services import plugin
 
