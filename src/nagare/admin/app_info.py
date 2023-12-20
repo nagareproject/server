@@ -20,7 +20,6 @@ class Info(command.Command):
         super(Info, self).set_arguments(parser)
 
         parser.add_argument('--on', action='store_true', help='only list the activated services')
-
         parser.add_argument('--off', action='store_false', help='only list the deactivated services')
 
         parser.add_argument(
@@ -32,11 +31,8 @@ class Info(command.Command):
         )
 
         parser.add_argument('-v', '--version', action='store_true', help='display the Python package versions')
-
         parser.add_argument('-l', '--location', action='store_true', help='display the Python package locations')
-
         parser.add_argument('-m', '--module', action='store_true', help='display the Python modules')
-
         parser.add_argument('-d', '--description', action='store_true', help='display the plugin description')
 
     @staticmethod
@@ -59,8 +55,8 @@ class Info(command.Command):
         config = {application_service.SELECTOR: application_service.selector}
         applications = application_service.iter_entry_points('', application_service.ENTRY_POINTS, config)
         if len(applications) == 1:
-            _, entry = applications[0]
-            print('Application: {} - version {}\n'.format(entry.dist.project_name, entry.dist.version))
+            dist, _, _ = applications[0]
+            print('Application: {} - version {}\n'.format(dist.name, dist.version))
 
         names = [name.split('/') for name in (names or [])]
         activated_columns = {name for name, activated in columns.items() if activated}
