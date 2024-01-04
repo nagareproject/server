@@ -34,7 +34,7 @@ class ExceptionsService(plugin.Plugin):
 
     def __init__(self, name, dist, exception_handler, services_service, **config):
         services_service(
-            super(ExceptionsService, self).__init__, name, dist, exception_handle=exception_handler, **config
+            super(ExceptionsService, self).__init__, name, dist, exception_handler=exception_handler, **config
         )
 
         self.exception_handler = reference.load_object(exception_handler)[0]
