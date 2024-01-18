@@ -48,9 +48,7 @@ def load_distribution(dist, path=None):
       - the distribution
     """
     dist = metadata.distribution(dist)
-    location = Distribution(dist).editable_project_location or dist.location
-    if path:
-        location = os.path.join(location, *path.split('/'))
+    location = Distribution(dist).editable_project_location or str(dist.locate_file(path or ''))
 
     return dist, location
 
