@@ -69,7 +69,9 @@ def get_roots(config, global_config):
                         raise ModuleNotFoundError("No module named '{}'".format(parent_module_name))
 
                     self.module_path = os.path.dirname(parent_module_spec.origin)
-                    self.package_path = Distribution(dist).editable_project_location or str(dist.locate_file(''))
+                    self.package_path = os.path.join(
+                        Distribution(dist).editable_project_location or str(dist.locate_file('')), self.app_name
+                    )
 
             application.from_dict(application_ori)
 
@@ -83,7 +85,7 @@ def get_roots(config, global_config):
         application.app_url,
         application.data,
         application.static,
-        (application.module_path, application.package_path),
+        (application.package_path, application.module_path),
     )
 
 
