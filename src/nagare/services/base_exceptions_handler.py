@@ -1,7 +1,7 @@
 # Encoding: utf-8
 
 # --
-# Copyright (c) 2008-2023 Net-ng.
+# Copyright (c) 2008-2024 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -14,32 +14,25 @@ from nagare.server import reference
 from nagare.services import plugin
 
 
-def default_exception_handler(exception, exceptions_service, services_service, **context):
-    exception = services_service(exceptions_service.handle_exception, exception, **context)
-
+def exception_handler(exception, exceptions_service, **context):
     exceptions_service.log_exception()
-
-    if getattr(exception, 'commit_transaction', False):
-        return exception
-    else:
-        raise exception
+    return exception
 
 
 class ExceptionsService(plugin.Plugin):
     LOAD_PRIORITY = 25
     CONFIG_SPEC = dict(
         plugin.Plugin.CONFIG_SPEC,
-        exception_handler='string(default="nagare.services.base_exceptions_handler:default_exception_handler")',
+        exception_handlers='string_list(default=list("nagare.services.base_exceptions_handler:exception_handler"))',
     )
 
-    def __init__(self, name, dist, exception_handler, services_service, **config):
+    def __init__(self, name, dist, exception_handlers, services_service, **config):
         services_service(
-            super(ExceptionsService, self).__init__, name, dist, exception_handler=exception_handler, **config
+            super(ExceptionsService, self).__init__, name, dist, exception_handlers=exception_handlers, **config
         )
 
-        self.exception_handler = reference.load_object(exception_handler)[0]
+        self.exception_handlers = [reference.load_object(handler)[0] for handler in exception_handlers]
         self.services = services_service
-        self.exception_handlers = []
 
     @staticmethod
     def log_exception(logger_name='nagare.services.exceptions', exc_info=True):
@@ -52,14 +45,11 @@ class ExceptionsService(plugin.Plugin):
         if exception_handler not in self.exception_handlers:
             self.exception_handlers.append(exception_handler)
 
-    def handle_exception(self, exception, services_service, **context):
-        for exception_handler in self.exception_handlers:
-            exception = services_service(exception_handler, exception, **context)
-
-        return exception
-
     def handle_request(self, chain, **params):
         try:
             return chain.next(**params)
         except Exception as exception:
-            return self.services(self.exception_handler, exception, **params)
+            for exception_handler in self.exception_handlers:
+                exception = self.services(exception_handler, exception, **params)
+
+            return exception
