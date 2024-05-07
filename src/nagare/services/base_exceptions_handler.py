@@ -24,19 +24,29 @@ class ExceptionsService(plugin.Plugin):
     CONFIG_SPEC = dict(
         plugin.Plugin.CONFIG_SPEC,
         exception_handlers='string_list(default=list("nagare.services.base_exceptions_handler:exception_handler"))',
+        commit_exceptions='string_list(default=list())',
     )
 
-    def __init__(self, name, dist, exception_handlers, services_service, **config):
+    def __init__(self, name, dist, exception_handlers, commit_exceptions, services_service, **config):
         services_service(
-            super(ExceptionsService, self).__init__, name, dist, exception_handlers=exception_handlers, **config
+            super(ExceptionsService, self).__init__,
+            name,
+            dist,
+            exception_handlers=exception_handlers,
+            commit_exceptions=commit_exceptions,
+            **config,
         )
 
         self.exception_handlers = [reference.load_object(handler)[0] for handler in exception_handlers]
+        self.commit_exceptions = tuple(reference.load_object(exception)[0] for exception in commit_exceptions)
         self.services = services_service
 
     @staticmethod
     def log_exception(logger_name='nagare.services.exceptions', exc_info=True):
         log.get_logger(logger_name).error('Unhandled exception', exc_info=exc_info)
+
+    def must_commit(self, exception):
+        return isinstance(exception, self.commit_exceptions)
 
     def clear_exception_handlers(self):
         self.exception_handlers = []
