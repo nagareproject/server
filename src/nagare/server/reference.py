@@ -131,10 +131,7 @@ def load_file(filename, app):
         sys.path.insert(0, dirname)
 
     name = os.path.splitext(os.path.basename(filename))[0]
-    try:
-        return load_module(name, app)
-    except (ImportError, ModuleNotFoundError):
-        return None, None
+    return load_module(name, app)
 
 
 loaders = {
