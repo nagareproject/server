@@ -9,6 +9,7 @@
 
 CURRENT_VIEW = ''
 ANON_VIEW = None
+DEFAULT_VIEW = '_default_'
 
 
 class ViewError(LookupError):
@@ -19,8 +20,11 @@ def _render(o, renderer, comp, view_name, *args, **kw):
     view = getattr(o, 'render_' + (view_name or ''), None)
 
     if view is None:
-        msg = ('No named view "%s"' % view_name) if view_name else 'No default view'
-        raise ViewError(msg + ' for ' + repr(o))
+        view = getattr(o, 'render_' + DEFAULT_VIEW, None)
+
+        if view is None:
+            msg = ('No named view "%s"' % view_name) if view_name else 'No default view'
+            raise ViewError(msg + ' for ' + repr(o))
 
     rendering = view(renderer, comp, view_name, *args, **kw)
 
@@ -41,7 +45,9 @@ def render(o, renderer, comp=None, view=None, view_name=CURRENT_VIEW, *args, **k
 
 def render_for(cls, view=ANON_VIEW, model=ANON_VIEW):
     def _(f):
-        setattr(cls, 'render_' + (view or model or ''), f)
+        view_name = DEFAULT_VIEW if view == '*' else (view or model or '')
+        setattr(cls, 'render_' + view_name, f)
+
         return f
 
     return _

@@ -32,16 +32,12 @@ def get_roots(config, global_config):
             super(Application, self).__init__()
 
         def load_plugins(self, config, global_config):
-            # Ignore all substitution errors
-            class D(dict):
-                def get(self, name):
-                    return super(D, self).get(name, '')
-
             application = config['application']
             application_ori = application.dict()
             try:
-                application.interpolate(D(global_config), ancestors_names=('application',))
+                application.interpolate(global_config, ancestors_names=('application',))
             except InterpolationError:
+                # Ignore all substitution errors
                 pass
 
             self.app_name = application.get('name')
