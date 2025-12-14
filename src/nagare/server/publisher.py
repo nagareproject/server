@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -14,11 +14,11 @@ from nagare.services import plugin
 
 class Publisher(plugin.Plugin):
     PLUGIN_CATEGORY = 'nagare.publishers'
-    CONFIG_SPEC = dict(plugin.Plugin.CONFIG_SPEC, _app_name='string(default="$app_name")')
+    CONFIG_SPEC = plugin.Plugin.CONFIG_SPEC | {'app_name': 'string(default="$app_name")'}
     has_multi_processes = has_multi_threads = False
 
     def __init__(self, name, dist, _app_name, **config):
-        super(Publisher, self).__init__(name, dist, **config)
+        super().__init__(name, dist, **config)
 
         self.app_name = _app_name
         self.request_handlers = []
@@ -48,7 +48,7 @@ class Publisher(plugin.Plugin):
         self.logger.info(self.generate_banner())
 
     def generate_banner(self):
-        return 'Serving application `{}`'.format(self.app_name)
+        return f'Serving application `{self.app_name}`'
 
     def handle_request(self, app, services_service, **params):
         return services_service.handle_request([], app=app, **params)
@@ -64,6 +64,6 @@ class Publisher(plugin.Plugin):
         status = services_service(self.monitor, lambda reloader, path: os._exit(3))
         if status == 0:
             app = services_service(self._create_app)
-            status = services_service(self._serve, app, **dict(self.plugin_config, **params))
+            status = services_service(self._serve, app, **(self.plugin_config | params))
 
         return status

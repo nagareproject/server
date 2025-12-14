@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -29,7 +29,7 @@ def get_roots(config, global_config):
             self.app_name = self.app_version = self.app_url = self.data = self.static = None
             self.package_path = self.module_path = None
 
-            super(Application, self).__init__()
+            super().__init__()
 
         def load_plugins(self, config, global_config):
             application = config['application']
@@ -50,9 +50,7 @@ def get_roots(config, global_config):
 
                 entries = {
                     name: (dist, entry)
-                    for dist, name, entry in super(Application, self).iter_entry_points(
-                        'application', 'nagare.applications', config
-                    )
+                    for dist, name, entry in super().iter_entry_points('application', 'nagare.applications', config)
                 }
 
                 if self.app_name in entries:
@@ -112,4 +110,4 @@ class Command(admin.Command):
             }
         )
 
-        return super(Command, cls)._create_services(config, config_filename, roots, global_config, create_application)
+        return super()._create_services(config, config_filename, roots, global_config, create_application)

@@ -1,7 +1,5 @@
-# Encoding: utf-8
-
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -21,15 +19,14 @@ def exception_handler(exception, exceptions_service, **context):
 
 class ExceptionsService(plugin.Plugin):
     LOAD_PRIORITY = 25
-    CONFIG_SPEC = dict(
-        plugin.Plugin.CONFIG_SPEC,
-        exception_handlers='string_list(default=list("nagare.services.base_exceptions_handler:exception_handler"))',
-        commit_exceptions='string_list(default=list())',
-    )
+    CONFIG_SPEC = plugin.Plugin.CONFIG_SPEC | {
+        'exception_handlers': 'string_list(default=list("nagare.services.base_exceptions_handler:exception_handler"))',
+        'commit_exceptions': 'string_list(default=list())',
+    }
 
     def __init__(self, name, dist, exception_handlers, commit_exceptions, services_service, **config):
         services_service(
-            super(ExceptionsService, self).__init__,
+            super().__init__,
             name,
             dist,
             exception_handlers=exception_handlers,

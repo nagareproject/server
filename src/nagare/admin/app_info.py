@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -17,7 +17,7 @@ class Info(command.Command):
     DESC = 'display application informations'
 
     def set_arguments(self, parser):
-        super(Info, self).set_arguments(parser)
+        super().set_arguments(parser)
 
         parser.add_argument('--on', action='store_true', help='only list the activated services')
         parser.add_argument('--off', action='store_false', help='only list the deactivated services')
@@ -56,7 +56,7 @@ class Info(command.Command):
         applications = application_service.iter_entry_points('', application_service.ENTRY_POINTS, config)
         if len(applications) == 1:
             dist, _, _ = applications[0]
-            print('Application: {} - version {}\n'.format(dist.name, dist.version))
+            print(f'Application: {dist.name} - version {dist.version}\n')
 
         names = [name.split('/') for name in (names or [])]
         activated_columns = {name for name, activated in columns.items() if activated}

@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -18,7 +18,7 @@ class Config(command.Command):
     DESC = 'display the services configuration and extra informations'
 
     def __init__(self, name=None, dist=None, **config):
-        super(Config, self).__init__(name, dist, **config)
+        super().__init__(name, dist, **config)
         self.raw_config = None
 
     def set_arguments(self, parser):
@@ -38,11 +38,11 @@ class Config(command.Command):
 
         parser.add_argument('--modified', action='store_true', help='display the modified configuration parameters')
 
-        super(Config, self).set_arguments(parser)
+        super().set_arguments(parser)
 
     def _create_services(self, config, config_filename):
         self.raw_config = config.dict()
-        return super(Config, self)._create_services(config, config_filename, create_application=True)
+        return super()._create_services(config, config_filename, create_application=True)
 
     @staticmethod
     def match_service(names, name):

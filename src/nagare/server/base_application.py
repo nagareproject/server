@@ -1,7 +1,5 @@
-# Encoding: utf-8
-
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -18,19 +16,18 @@ from nagare.services import plugin
 
 class App(plugin.Plugin):
     PLUGIN_CATEGORY = 'nagare.applications'
-    CONFIG_SPEC = dict(
-        plugin.Plugin.CONFIG_SPEC,
-        _root='string(default="$root")',
-        _data='string(default="$data")',
-        _config_filename='string(default="$config_filename")',
-        _user_config_filename='string(default="$user_config_filename")',
-    )
+    CONFIG_SPEC = plugin.Plugin.CONFIG_SPEC | {
+        '_root': 'string(default="$root")',
+        '_data': 'string(default="$data")',
+        '_config_filename': 'string(default="$config_filename")',
+        '_user_config_filename': 'string(default="$user_config_filename")',
+    }
 
     def __init__(
         self, name, dist, _root, _data, _config_filename, _user_config_filename, reloader_service=None, **config
     ):
         """Initialization."""
-        super(App, self).__init__(name, dist, **config)
+        super().__init__(name, dist, **config)
 
         self.version = dist and dist.version
         self.root_path = _root

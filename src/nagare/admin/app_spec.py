@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -19,7 +19,7 @@ class Spec(command.Command):
 
     def __init__(self, name, dist, **config):
         self.config = None
-        super(Spec, self).__init__(name, dist, **config)
+        super().__init__(name, dist, **config)
 
     def set_arguments(self, parser):
         parser.add_argument(
@@ -30,7 +30,7 @@ class Spec(command.Command):
             help='name of the service to display (can be specified multiple times and wildchars are allowed)',
         )
 
-        super(Spec, self).set_arguments(parser)
+        super().set_arguments(parser)
 
     @staticmethod
     def match_service(names, name):
@@ -48,7 +48,7 @@ class Spec(command.Command):
 
     def _create_services(self, config, config_filename):
         self.config = config
-        return super(Spec, self)._create_services(config, config_filename, create_application=True)
+        return super()._create_services(config, config_filename, create_application=True)
 
     def run(self, names, services_service, application_service=None):
         names = [name.split('/') for name in (names or [])]

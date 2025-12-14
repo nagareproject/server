@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -19,12 +19,12 @@ class RequestHandlersChain(list):
 
 class Services(services.Services):
     def __init__(self, *args, **kw):
-        super(Services, self).__init__(*args, **kw)
+        super().__init__(*args, **kw)
         self.request_handlers = None
 
     @staticmethod
     def _has_handler(service, handle_name):
-        return getattr(service, 'has_{}_handler'.format(handle_name), hasattr(service, 'handle_{}'.format(handle_name)))
+        return getattr(service, f'has_{handle_name}_handler', hasattr(service, f'handle_{handle_name}'))
 
     def handlers(self, handle_name):
         return [service for service in self.values() if self._has_handler(service, handle_name)]
@@ -77,16 +77,16 @@ class Services(services.Services):
 
     def handle_interaction(self):
         namespaces = [service.handle_interaction() for service in self.handlers('interaction')]
-        return reduce(lambda d, new: dict(d, **new), namespaces, {})
+        return reduce(lambda d, new: d | new, namespaces, {})
 
     # -----------------------------------------------------------------------------------------------------------------
 
     def report(self, name, activated_columns=None, criterias=lambda *args: True):
-        super(Services, self).report(name, 'Services', activated_columns, criterias)
+        super().report(name, 'Services', activated_columns, criterias)
 
         print('')
 
-        super(Services, self).report(
+        super().report(
             name,
             'Request handlers',
             activated_columns,
@@ -95,7 +95,7 @@ class Services(services.Services):
 
         print('')
 
-        super(Services, self).report(
+        super().report(
             name,
             'Start handlers',
             activated_columns,
@@ -108,7 +108,7 @@ class Services(services.Services):
 class SelectionService(plugin.SelectionPlugin):
     def __init__(self, name_, dist, type, services_service, **config):
         self.services = services_service
-        super(SelectionService, self).__init__(type, dist, type, **config)
+        super().__init__(type, dist, type, **config)
 
     def _load_plugin(self, name_, dist, plugin_cls, **config):
         config = config.copy()

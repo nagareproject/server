@@ -1,7 +1,5 @@
-# Encoding: utf-8
-
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -16,15 +14,15 @@ from nagare.server import services
 class Application(services.SelectionService):
     ENTRY_POINTS = 'nagare.applications'
     SELECTOR = 'name'
-    CONFIG_SPEC = dict(
-        services.SelectionService.CONFIG_SPEC,
-        name='string(default=None, help="name of the application entry-point, registered under [nagare.applications]")',
-    )
+    CONFIG_SPEC = services.SelectionService.CONFIG_SPEC | {
+        'name': 'string(default=None, '
+        'help="name of the application entry-point, registered under [nagare.applications]")'
+    }
     del CONFIG_SPEC['type']
     LOAD_PRIORITY = 1100
 
     def __init__(self, name_, dist, name, services_service, **config):
-        services_service(super(Application, self).__init__, name, dist, name, **config)
+        services_service(super().__init__, name, dist, name, **config)
 
     @property
     def DESC(self):
@@ -56,7 +54,7 @@ class Application(services.SelectionService):
         global_config = config.pop('_global_config', {})
         config = {self.SELECTOR: self.selector, self.name: config}
 
-        super(Application, self).load_plugins(self.name, config_from_dict(config), global_config, True)
+        super().load_plugins(self.name, config_from_dict(config), global_config, True)
 
         return self.service
 

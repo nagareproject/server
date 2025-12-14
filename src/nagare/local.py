@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2008-2024 Net-ng.
+# Copyright (c) 2014-2025 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -31,11 +31,11 @@ class Thread(threading.local):
         return threading.Lock()
 
 
-class DummyLock(object):
+class DummyLock:
     acquire = release = __enter__ = __exit__ = lambda *args: True
 
 
-class Process(object):
+class Process:
     """Objects with attributes scoped to the process."""
 
     def clear(self):
@@ -55,7 +55,7 @@ class Local(plugin.Plugin):
     def __init__(self, name, dist, publisher_service=None):
         global worker, request
 
-        super(Local, self).__init__(name, dist)
+        super().__init__(name, dist)
 
         if publisher_service:
             publisher = publisher_service.service
