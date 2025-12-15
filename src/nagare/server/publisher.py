@@ -14,7 +14,7 @@ from nagare.services import plugin
 
 class Publisher(plugin.Plugin):
     PLUGIN_CATEGORY = 'nagare.publishers'
-    CONFIG_SPEC = plugin.Plugin.CONFIG_SPEC | {'app_name': 'string(default="$app_name")'}
+    CONFIG_SPEC = plugin.Plugin.CONFIG_SPEC | {'_app_name': 'string(default="$app_name")'}
     has_multi_processes = has_multi_threads = False
 
     def __init__(self, name, dist, _app_name, **config):
