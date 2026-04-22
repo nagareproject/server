@@ -8,8 +8,6 @@
 # --
 
 import os
-import sys
-import pathlib
 
 from nagare.services import plugin
 
@@ -24,37 +22,23 @@ class App(plugin.Plugin):
     }
 
     def __init__(
-        self, name, dist, _root, _data, _config_filename, _user_config_filename, reloader_service=None, **config
+        self, name_, dist_, _root, _data, _config_filename, _user_config_filename, reloader_service=None, **config
     ):
         """Initialization."""
-        super().__init__(name, dist, **config)
+        super().__init__(name_, dist_, **config)
 
-        self.version = dist and dist.version
+        self.version = dist_ and dist_.version
         self.root_path = _root
         self.data_path = _data
 
         if reloader_service is not None:
-            for module in list(sys.modules.values()):
-                filename = getattr(module, '__file__', None)
-                if (
-                    filename
-                    and not self._is_relative_to(filename, sys.base_prefix)
-                    and not self._is_relative_to(filename, sys.exec_prefix)
-                ):
-                    filename = os.path.abspath(filename)
-                    reloader_service.watch_file(filename[:-1] if filename.endswith(('.pyc', '.pyo')) else filename)
-
+            reloader_service.watch_dir(
+                dist_.locate_file(''), lambda event, root, filename: True if filename.endswith('.py') else None, True
+            )
             reloader_service.watch_file(_config_filename)
+
             if os.path.isfile(_user_config_filename):
                 reloader_service.watch_file(_user_config_filename)
-
-    @staticmethod
-    def _is_relative_to(path, root):
-        try:
-            pathlib.PurePath(path).relative_to(root)
-            return True
-        except ValueError:
-            return False
 
     def handle_start(self, app):
         pass
