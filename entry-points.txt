@@ -11,5 +11,5 @@ spec = nagare.admin.app_spec:Spec
 [nagare.services]
 local = nagare.local:Local
 exceptions = nagare.services.base_exceptions_handler:ExceptionsService
-publisher = nagare.server.publishers:Publishers
+publisher = nagare.services.publishers:Publishers
 application = nagare.server.applications:Application

@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2014-2025 Net-ng.
+# Copyright (c) 2014-2026 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -21,8 +21,8 @@ class Application(services.SelectionService):
     del CONFIG_SPEC['type']
     LOAD_PRIORITY = 1100
 
-    def __init__(self, name_, dist, name, services_service, **config):
-        services_service(super().__init__, name, dist, name, **config)
+    def __init__(self, name_, dist_, name, services_service, **config):
+        services_service(super().__init__, name, dist_, name, **config)
 
     @property
     def DESC(self):

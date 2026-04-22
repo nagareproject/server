@@ -1,5 +1,5 @@
 # --
-# Copyright (c) 2014-2025 Net-ng.
+# Copyright (c) 2014-2026 Net-ng.
 # All rights reserved.
 #
 # This software is licensed under the BSD License, as described in
@@ -23,8 +23,8 @@ def _render(o, renderer, comp, view_name, *args, **kw):
         view = getattr(o, 'render_' + DEFAULT_VIEW, None)
 
         if view is None:
-            msg = ('No named view "%s"' % view_name) if view_name else 'No default view'
-            raise ViewError(msg + ' for ' + repr(o))
+            msg = f'No named view "{view_name}"' if view_name else 'No default view'
+            raise ViewError(f'{msg} for {o}')
 
     rendering = view(renderer, comp, view_name, *args, **kw)
 
