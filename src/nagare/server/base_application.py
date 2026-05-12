@@ -33,7 +33,9 @@ class App(plugin.Plugin):
 
         if reloader_service is not None:
             reloader_service.watch_dir(
-                dist_.locate_file(name_), lambda event, root, filename: True if filename.endswith('.py') else None, True
+                dist_.locate_file(dist_.name),
+                lambda event, root, filename: True if filename.endswith('.py') else None,
+                True,
             )
             reloader_service.watch_file(_config_filename)
 

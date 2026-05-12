@@ -26,7 +26,7 @@ class Application(services.SelectionService):
 
     @property
     def DESC(self):
-        return 'Proxy to the <%s> application' % self.selector
+        return f'Proxy to the <{self.selector}> application'
 
     @staticmethod
     def _walk(o, name, entry_points, config, global_config, activated_by_default, get_children):
